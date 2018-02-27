@@ -1,4 +1,4 @@
-SAPLING: Suffix Array Piecewise Linear INstrument for Genomics
+SAPLING: Suffix Array Piecewise Linear INdex for Genomics
 
 Most recent results:  
 Building suffix array of length 12157105  

@@ -1,5 +1,5 @@
 /*
- * SAPLING: Suffix Array Piecewise Linear INstrument for Genomics
+ * SAPLING: Suffix Array Piecewise Linear INdex for Genomics
  */
 import java.util.*;
 import java.io.*;
