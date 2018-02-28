@@ -13,10 +13,12 @@ public class compare {
 	static int[] rev;
 	static int n;
 	static int[] errors;
+	static SuffixArray lsa;
 	static ArrayList<Integer> overs, unders;
 	static int[] vals;
 	static int maxOver, maxUnder, meanError;
 	static int mostOver, mostUnder;
+	static int[] llcp, rlcp;
 public static void main(String[] args) throws IOException
 {
 	vals = new int[256];
@@ -36,18 +38,19 @@ public static void main(String[] args) throws IOException
 	n = s.length();
 	reference = s.toCharArray();
 	System.out.println("Building suffix array of length " + s.length());
-	SuffixArray lsa = new SuffixArray(s);
+	lsa = new SuffixArray(s);
 	sa = new int[n]; 
 	rev = new int[n];
 	for(int i = 0; i<n; i++) rev[sa[i] = lsa.inv[i]] = i;
 	System.out.println("Built suffix array");
 	buildPiecewiseLinear(s, lsa.inv);
+	initializeLCPs();
 	System.out.println("Mean error: " + meanError);
 	System.out.println("Prediction range: (" + -maxUnder + ", " + maxOver + ")");
 	System.out.println(mostThreshold + " of over-predictions are within " + mostOver);
 	System.out.println(mostThreshold + " of under-predictions are within " + mostUnder);
 	Random r = new Random(42);
-	int numQueries = 1000000;
+	int numQueries = 5000000;
 	char[][] queries = new char[numQueries][];
 	long[] kmers = new long[numQueries];
 	for(int i = 0; i<numQueries; i++)
@@ -111,7 +114,7 @@ static int bQuery(char[] s)
 	if(loLcp == s.length) return rev[0];
 	int hiLcp = getLcp(rev[n-k], s, 0);
 	if(hiLcp == s.length) return rev[n-k];
-	return rev[binarySearch(s, 0, n-k, loLcp, hiLcp)];
+	return rev[fancyBinarySearch(s, 0, n-k, loLcp, hiLcp)];
 }
 
 /*
@@ -224,6 +227,74 @@ static int binarySearch(char[] s, int lo, int hi, int loLcp, int hiLcp)
 	}
 }
 /*
+ * Fancy binary search.  We know:
+ * Actual position in suffix array is in (lo, hi)
+ * LCP between suffix corresponding to position lo in suffix array with query is loLcp
+ * LCP between suffix corresponding to position hi in suffix array with query is hiLcp
+ */
+static int fancyBinarySearch(char[] s, int lo, int hi, int loLcp, int hiLcp)
+{
+	// Base case
+	if(hi == lo + 2) return lo + 1;
+	
+	// TODO make this fancier and get rid of log factor
+	int mid = (lo + hi) >> 1;
+	if(loLcp >= hiLcp)
+	{
+		if(llcp[mid] > loLcp)
+		{
+			return binarySearch(s, mid, hi, loLcp, hiLcp);
+		}
+		else if(llcp[mid] == loLcp)
+		{
+			int idx = rev[mid];
+			int nLcp = getLcp(idx, s, loLcp);
+			if(nLcp == s.length) return mid;
+			if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
+			{
+				// suffix too small - search right half
+				return binarySearch(s, mid, hi, nLcp, hiLcp);
+			}
+			else
+			{
+				// suffix too big - search left half
+				return binarySearch(s, lo, mid, loLcp, nLcp);
+			}
+		}
+		else
+		{
+			return binarySearch(s, lo, mid, loLcp, llcp[mid]);
+		}
+	}
+	else
+	{
+		if(rlcp[mid] > hiLcp)
+		{
+			return binarySearch(s, lo, mid, loLcp, hiLcp);
+		}
+		else if(rlcp[mid] == hiLcp)
+		{
+			int idx = rev[mid];
+			int nLcp = getLcp(idx, s, hiLcp);
+			if(nLcp == s.length) return mid;
+			if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
+			{
+				// suffix too small - search right half
+				return binarySearch(s, mid, hi, nLcp, hiLcp);
+			}
+			else
+			{
+				// suffix too big - search left half
+				return binarySearch(s, lo, mid, loLcp, nLcp);
+			}
+		}
+		else
+		{
+			return binarySearch(s, mid, hi, rlcp[mid], hiLcp);
+		}
+	}
+}
+/*
  * Returns the lcp of the suffix of reference beginning at position idx and the string s
  */
 static int getLcp(int idx, char[] s, int start)
@@ -319,6 +390,21 @@ static int queryPiecewiseLinear(long x)
 	long yhi = ylist[bucket+1];
 	long predict = (long)(.5 + ylo + (yhi - ylo) * (x - xlo) * 1. / (xhi - xlo));
 	return (int)predict;
+}
+static void initializeLCPs()
+{
+	llcp = new int[n];
+	rlcp = new int[n];
+	fillLCPs(0, n-1);
+}
+static void fillLCPs(int lo, int hi)
+{
+	if(hi - lo <= 2) return;
+	int mid = (lo + hi) >> 1;
+	llcp[mid] = lsa.lcp(rev[lo], rev[mid]);
+	rlcp[mid] = lsa.lcp(rev[mid], rev[hi]);
+	fillLCPs(lo, mid);
+	fillLCPs(mid, hi);
 }
 public static class SuffixArray {
     public RMQ rmq;
