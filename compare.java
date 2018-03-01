@@ -5,6 +5,7 @@ import java.util.*;
 import java.io.*;
 public class compare {
 	static String refString;
+	static int alpha = 2;
 	static int k = 21;
 	static int buckets = 15;
 	static double mostThreshold = 0.95;
@@ -22,7 +23,11 @@ public class compare {
 public static void main(String[] args) throws IOException
 {
 	vals = new int[256];
-	vals['A'] = 0; vals['C'] = 1; vals['G'] = 2; vals['T'] = 3;
+	vals['A'] = (1<<alpha)-4;
+	vals['C'] = (1<<alpha)-3;
+	vals['G'] = (1<<alpha)-2;
+	vals['T'] = (1<<alpha)-1;
+	vals['N'] = (1<<alpha)-5;
 	String fn = "/home/mkirsche/work/lis/yeast.fa";
 	Scanner input = new Scanner(new FileInputStream(new File(fn)));
 	StringBuilder sb = new StringBuilder("");
@@ -196,7 +201,8 @@ static int plQuery(char[] s, long kmer)
 static long kmerize(char[] s)
 {
 	long kmer = 0;
-	for(int i = 0; i<k; i++) kmer = kmer << 2 | vals[s[i]];
+	//if(alpha == 3 && ((k&1) == 0)) for(int i = 0; i<k; i+= 2) kmer = (kmer << 5) | (vals[s[i]] * 5 +vals[s[i+1]]);
+	for(int i = 0; i<k; i++) kmer = (kmer << alpha) | vals[s[i]];
 	return kmer;
 }
 /*
@@ -311,26 +317,10 @@ static void buildPiecewiseLinear(String s, int[] sa)
 {
 	ArrayList<Long> xs = new ArrayList<Long>();
 	ArrayList<Integer> ys = new ArrayList<Integer>();
-	long hash = 0;
 	int[] vals = new int[256];
-	vals['A'] = 0;
-	vals['C'] = 1;
-	vals['G'] = 2;
-	vals['T'] = 3;
-	k = 21;
-	for(int i = 0; i < k; i++)
+	for(int i = 0; i+k<=s.length(); i++)
 	{
-		hash = (hash << 2) + vals[s.charAt(i)];
-	}
-	xs.add(hash);
-	ys.add(sa[0]);
-	for(int i = 1; i+k<=s.length(); i++)
-	{
-		hash = 0;
-		for(int j = 0; j<k; j++)
-		{
-			hash = (hash << 2) +vals[s.charAt(i+j)];
-		}
+		long hash = kmerize(s.substring(i, i+k).toCharArray());
 		xs.add(hash);
 		ys.add(sa[i]);
 	}
@@ -340,7 +330,8 @@ static void buildPiecewiseLinear(String s, int[] sa)
 	for(int i = 0; i<xs.size(); i++)
 	{
 		long x = xs.get(i), y = ys.get(i);
-		int bucket = (int)(x >> (2*k - buckets));
+		int bucket = 0;
+		bucket = (int)(x >> (alpha*k - buckets));
 		if(xlist[bucket] == -1 || xlist[bucket] > x)
 		{
 			xlist[bucket] = x;
@@ -383,7 +374,9 @@ static void errorStats()
 }
 static int queryPiecewiseLinear(long x)
 {
-	int bucket = (int)(x >> (2*k - buckets));
+	int bucket = 0;
+	//if(alpha == 3 && ((k&1) == 0)) bucket = (int)(x >> (5*(k>>1) - buckets));
+	bucket = (int)(x >> (alpha*k - buckets));
 	long xlo = xlist[bucket];
 	long xhi = xlist[bucket+1];
 	long ylo = ylist[bucket];
@@ -426,7 +419,7 @@ public static class SuffixArray {
     
     public SuffixArray(String dna)
     {
-    	this(dna.replaceAll("C", "B").replaceAll("G", "C").replaceAll("T", "D").replaceAll("N", "E"), 4);
+    	this(dna.replaceAll("C", "B").replaceAll("G", "C").replaceAll("T", "D").replaceAll("N", "E"), 1<<alpha);
     }
 
     public SuffixArray(String str, int letters) {
@@ -618,3 +611,4 @@ public static class SuffixArray {
     }
 }
 }
+
