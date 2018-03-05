@@ -39,6 +39,7 @@ public static void main(String[] args) throws IOException
 			sb.append(cur);
 	}
 	String s = sb.toString();
+	s = s.replaceAll("N", "");
 	refString = s;
 	n = s.length();
 	reference = s.toCharArray();
@@ -92,6 +93,7 @@ public static void main(String[] args) throws IOException
 	time = System.currentTimeMillis();
 	for(int i = 0; i<numQueries; i++)
 	{
+		//System.out.println(new String(queries[i]));
 		bAnswers[i] = bQuery(queries[i]);
 	}
 	curTime = System.currentTimeMillis();
@@ -241,15 +243,24 @@ static int binarySearch(char[] s, int lo, int hi, int loLcp, int hiLcp)
 static int fancyBinarySearch(char[] s, int lo, int hi, int loLcp, int hiLcp)
 {
 	// Base case
+	if(hi == lo+1) return -1;
 	if(hi == lo + 2) return lo + 1;
 	
 	// TODO make this fancier and get rid of log factor
 	int mid = (lo + hi) >> 1;
+		
+	if(lo<hi-1)
+	{
+		//System.out.println(lo+" "+hi+" "+refString.substring(rev[mid], Math.min(n, rev[mid]+20)));
+		//System.out.println(refString.substring(rev[lo], Math.min(n, rev[lo]+20))+" "+refString.substring(rev[hi], Math.min(n, rev[hi]+20)));
+		//System.out.println(loLcp+" "+hiLcp+" "+llcp[mid]+" "+rlcp[mid]);
+	}
+		
 	if(loLcp >= hiLcp)
 	{
 		if(llcp[mid] > loLcp)
 		{
-			return binarySearch(s, mid, hi, loLcp, hiLcp);
+			return fancyBinarySearch(s, mid, hi, loLcp, hiLcp);
 		}
 		else if(llcp[mid] == loLcp)
 		{
@@ -259,24 +270,24 @@ static int fancyBinarySearch(char[] s, int lo, int hi, int loLcp, int hiLcp)
 			if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
 			{
 				// suffix too small - search right half
-				return binarySearch(s, mid, hi, nLcp, hiLcp);
+				return fancyBinarySearch(s, mid, hi, nLcp, hiLcp);
 			}
 			else
 			{
 				// suffix too big - search left half
-				return binarySearch(s, lo, mid, loLcp, nLcp);
+				return fancyBinarySearch(s, lo, mid, loLcp, nLcp);
 			}
 		}
 		else
 		{
-			return binarySearch(s, lo, mid, loLcp, llcp[mid]);
+			return fancyBinarySearch(s, lo, mid, loLcp, llcp[mid]);
 		}
 	}
 	else
 	{
 		if(rlcp[mid] > hiLcp)
 		{
-			return binarySearch(s, lo, mid, loLcp, hiLcp);
+			return fancyBinarySearch(s, lo, mid, loLcp, hiLcp);
 		}
 		else if(rlcp[mid] == hiLcp)
 		{
@@ -286,17 +297,84 @@ static int fancyBinarySearch(char[] s, int lo, int hi, int loLcp, int hiLcp)
 			if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
 			{
 				// suffix too small - search right half
-				return binarySearch(s, mid, hi, nLcp, hiLcp);
+				return fancyBinarySearch(s, mid, hi, nLcp, hiLcp);
 			}
 			else
 			{
 				// suffix too big - search left half
-				return binarySearch(s, lo, mid, loLcp, nLcp);
+				return fancyBinarySearch(s, lo, mid, loLcp, nLcp);
 			}
 		}
 		else
 		{
-			return binarySearch(s, mid, hi, rlcp[mid], hiLcp);
+			return fancyBinarySearch(s, mid, hi, rlcp[mid], hiLcp);
+		}
+	}
+}
+/*
+ * Fancy binary search modified to work when the initial call to the binary search can vary - currently too slow
+ */
+static int dynamicFancyBinarySearch(char[] s, int lo, int hi, int loLcp, int hiLcp)
+{
+	// Base case
+	if(hi == lo + 2) return lo + 1;
+		
+	// TODO make this fancier and get rid of log factor
+	int mid = (lo + hi) >> 1;
+	if(loLcp >= hiLcp)
+	{
+		int llcp = lsa.lcp(rev[lo], rev[mid]);
+		if(llcp > loLcp)
+		{
+			return dynamicFancyBinarySearch(s, mid, hi, loLcp, hiLcp);
+		}
+		else if(llcp == loLcp)
+		{
+			int idx = rev[mid];
+			int nLcp = getLcp(idx, s, loLcp);
+			if(nLcp == s.length) return mid;
+			if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
+			{
+				// suffix too small - search right half
+				return dynamicFancyBinarySearch(s, mid, hi, nLcp, hiLcp);
+			}
+			else
+			{
+				// suffix too big - search left half
+				return dynamicFancyBinarySearch(s, lo, mid, loLcp, nLcp);
+			}
+		}
+		else
+		{
+			return dynamicFancyBinarySearch(s, lo, mid, loLcp, llcp);
+		}
+	}
+	else
+	{
+		int rlcp = lsa.lcp(rev[hi], rev[mid]);
+		if(rlcp > hiLcp)
+		{
+			return dynamicFancyBinarySearch(s, lo, mid, loLcp, hiLcp);
+		}
+		else if(rlcp == hiLcp)
+		{
+			int idx = rev[mid];
+			int nLcp = getLcp(idx, s, hiLcp);
+			if(nLcp == s.length) return mid;
+			if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
+			{
+				// suffix too small - search right half
+				return dynamicFancyBinarySearch(s, mid, hi, nLcp, hiLcp);
+			}
+			else
+			{
+				// suffix too big - search left half
+				return dynamicFancyBinarySearch(s, lo, mid, loLcp, nLcp);
+			}
+		}
+		else
+		{
+			return dynamicFancyBinarySearch(s, mid, hi, rlcp, hiLcp);
 		}
 	}
 }
@@ -388,7 +466,7 @@ static void initializeLCPs()
 {
 	llcp = new int[n];
 	rlcp = new int[n];
-	fillLCPs(0, n-1);
+	fillLCPs(0, n-k);
 }
 static void fillLCPs(int lo, int hi)
 {
@@ -611,4 +689,3 @@ public static class SuffixArray {
     }
 }
 }
-
