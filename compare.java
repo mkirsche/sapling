@@ -5,6 +5,7 @@ import java.util.*;
 import java.io.*;
 public class compare {
 	static String refString;
+	static boolean replace = true; // whether or not to replace all non-base characters with A's
 	static int alpha = 2;
 	static int k = 21;
 	static int buckets = 15;
@@ -28,7 +29,7 @@ public static void main(String[] args) throws IOException
 	vals['G'] = (1<<alpha)-2;
 	vals['T'] = (1<<alpha)-1;
 	vals['N'] = (1<<alpha)-5;
-	String fn = "/home/mkirsche/work/lis/yeast.fa";
+	String fn = "/home/mkirsche/work/lis/chr22.fa";
 	Scanner input = new Scanner(new FileInputStream(new File(fn)));
 	StringBuilder sb = new StringBuilder("");
 	input.nextLine();
@@ -39,7 +40,7 @@ public static void main(String[] args) throws IOException
 			sb.append(cur);
 	}
 	String s = sb.toString();
-	s = s.replaceAll("N", "");
+	if(replace) s = replace(s);
 	refString = s;
 	n = s.length();
 	reference = s.toCharArray();
@@ -206,6 +207,21 @@ static long kmerize(char[] s)
 	//if(alpha == 3 && ((k&1) == 0)) for(int i = 0; i<k; i+= 2) kmer = (kmer << 5) | (vals[s[i]] * 5 +vals[s[i+1]]);
 	for(int i = 0; i<k; i++) kmer = (kmer << alpha) | vals[s[i]];
 	return kmer;
+}
+/*
+ * Replace all non-base characters in s with 'A'
+ */
+static String replace(String s)
+{
+	int n = s.length();
+	char[] res = new char[n];
+	for(int i = 0; i<n; i++)
+	{
+		char c = s.charAt(i);
+		if(c == 'A' || c == 'C' || c == 'G' || c == 'T') res[i] = c;
+		else res[i] = 'A';
+	}
+	return new String(res);
 }
 /*
  * Binary search.  We know:
