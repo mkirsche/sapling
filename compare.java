@@ -8,7 +8,7 @@ public class compare {
 	static boolean replace = true; // whether or not to replace all non-base characters with A's
 	static int alpha = 2;
 	static int k = 21;
-	static int buckets = 15;
+	static int buckets = 20;
 	static double mostThreshold = 0.95;
 	static char[] reference;
 	static int[] sa; //sa[i] is the location in the suffix array where character i in reference appears
@@ -29,22 +29,25 @@ public static void main(String[] args) throws IOException
 	vals['G'] = (1<<alpha)-2;
 	vals['T'] = (1<<alpha)-1;
 	vals['N'] = (1<<alpha)-5;
-	String fn = "/home/mkirsche/work/lis/chr22.fa";
+	String fn = args.length > 0 ? args[0] : "/home/mkirsche/work/lis/yeast.fa";
 	Scanner input = new Scanner(new FileInputStream(new File(fn)));
-	StringBuilder sb = new StringBuilder("");
+	CustomStringBuilder sb = new CustomStringBuilder("");
 	input.nextLine();
 	while(input.hasNext())
 	{
-		String cur = input.nextLine();
+		String cur = input.nextLine().toUpperCase();
+		if(cur.contains("CHROMOSOME 4")) break;
 		if(!cur.startsWith(">"))
 			sb.append(cur);
+		else System.out.println(cur);
 	}
+	System.out.println("Building Suffix Array");
 	String s = sb.toString();
+	System.out.println(s.length());
 	if(replace) s = replace(s);
 	refString = s;
 	n = s.length();
 	reference = s.toCharArray();
-	System.out.println("Building suffix array of length " + s.length());
 	lsa = new SuffixArray(s);
 	sa = new int[n]; 
 	rev = new int[n];
@@ -209,19 +212,13 @@ static long kmerize(char[] s)
 	return kmer;
 }
 /*
- * Replace all non-base characters in s with 'A'
+ * Remove all non-base characters in s with 'A'
  */
 static String replace(String s)
 {
-	int n = s.length();
-	char[] res = new char[n];
-	for(int i = 0; i<n; i++)
-	{
-		char c = s.charAt(i);
-		if(c == 'A' || c == 'C' || c == 'G' || c == 'T') res[i] = c;
-		else res[i] = 'A';
-	}
-	return new String(res);
+	char[] ss = new char[] {'N','M','R','W','X','Y','Z', 'J', 'K', 'L'};
+	for(char c : ss) s = s.replaceAll(""+c, "");
+	return s;
 }
 /*
  * Binary search.  We know:
@@ -411,7 +408,6 @@ static void buildPiecewiseLinear(String s, int[] sa)
 {
 	ArrayList<Long> xs = new ArrayList<Long>();
 	ArrayList<Integer> ys = new ArrayList<Integer>();
-	int[] vals = new int[256];
 	for(int i = 0; i+k<=s.length(); i++)
 	{
 		long hash = kmerize(s.substring(i, i+k).toCharArray());
@@ -442,11 +438,49 @@ static void buildPiecewiseLinear(String s, int[] sa)
 	unders = new ArrayList<Integer>();
 	for(int i = 0; i<xs.size(); i++)
 	{
-		errors[i] = ys.get(i) - queryPiecewiseLinear(xs.get(i));
+		int predict = queryPiecewiseLinear(xs.get(i));
+		int y = ys.get(i);
+		errors[i] = getError(y, predict);
+		if(Math.abs(errors[i]) > 1e5)
+		{
+			System.out.println(y+" "+predict+" "+refString.substring(rev[ys.get(i)], rev[ys.get(i)] + k));
+		}
 		if(errors[i] > 0) overs.add(errors[i]);
 		else unders.add(-errors[i]);
 	}
 	errorStats();
+}
+static int getError(int y, int predict)
+{
+	if(y < predict)
+	{
+		int lo = y, hi = predict+1;
+		while(lo < hi - 1)
+		{
+			int mid = (lo+hi)/2;
+			if(lsa.lcp(mid, y) >= k)
+			{
+				lo = mid;
+			}
+			else hi = mid;
+		}
+		return lo - predict;
+	}
+	else if(y == predict) return 0;
+	else 
+	{
+		int lo = predict - 1, hi = y;
+		while(lo < hi - 1)
+		{
+			int mid = (lo+hi)/2;
+			if(lsa.lcp(mid, y) >= k)
+			{
+				hi = mid;
+			}
+			else lo = mid;
+		}
+		return hi - predict;
+	}
 }
 static void errorStats()
 {
@@ -703,5 +737,42 @@ public static class SuffixArray {
     		return Math.min(a[rmq[i][k]], a[rmq[j-(1<<k)+1][k]]);
     	}
     }
+}
+static class CustomStringBuilder
+{
+	char[] str;
+	int n;
+	CustomStringBuilder()
+	{
+		this("");
+	}
+	CustomStringBuilder(String s)
+	{
+		n = s.length();
+		this.str = new char[n];
+	}
+	void append(String s)
+	{
+		if(s.length() + n > str.length)
+		{
+			int nlength = str.length+1;
+			while(nlength < s.length() + n)
+			{
+				nlength *= 2;
+			}
+			char[] nstr = new char[nlength];
+			for(int i = 0; i<n; i++) nstr[i] = str[i];
+			str = nstr;
+		}
+		for(int i = 0; i<s.length(); i++) str[i+n] = s.charAt(i);
+		if((n+s.length())/10000000 > n/10000000) System.out.println(n);
+		n += s.length();
+	}
+	public String toString()
+	{
+		char[] res = new char[n];
+		for(int i =0; i<n; i++) res[i] = str[i];
+		return new String(res);
+	}
 }
 }
