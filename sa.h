@@ -163,6 +163,8 @@ vector<int> toIntVector(string str) {
 
         lcp = getLCP();
     }
+    
+    SuffixArray(){}
 };
 
 SuffixArray sa_init2(string str, int letters)
@@ -179,3 +181,4 @@ SuffixArray sa_init3(string dna, int alpha)
     std::replace(rep.begin(), rep.end(), 'N', 'E');
     return sa_init2(rep, 1<<alpha);
 }
+
