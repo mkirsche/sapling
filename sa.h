@@ -9,12 +9,12 @@
 using namespace std;
 
 vector<int> toIntVector(string str) {
-    int arr[str.length()+3];
+    vector<int> res(str.length() + 3, 0);
     for (int i = 0; i < str.length(); i++) {
-        arr[i] = str[i] - 'A' + 1;
+        res[i] = str[i] - 'A' + 1;
     }
-    arr[str.length()] = arr[str.length()+1] = arr[str.length()+2] = 0;
-    return std::vector<int>(arr, arr + sizeof arr / sizeof arr[0]);
+    res[str.length()] = res[str.length()+1] = res[str.length()+2] = 0;
+    return res;
 }
  
  struct SuffixArray {
@@ -27,7 +27,7 @@ vector<int> toIntVector(string str) {
     int letters;
 
     void radixPass(vector<int> a, vector<int>* b, vector<int> ref, int offset, int n, int letters) {
-        int cnt[letters + 1];
+        vector<int> cnt(letters+1, 0);
         for(int i = 0; i<letters+1; i++) cnt[i] = 0;
         for (int i = 0; i < n; i++) {
             cnt[ref[a[i] + offset]]++;
@@ -130,7 +130,7 @@ vector<int> toIntVector(string str) {
     }
 
     vector<int> getLCP() {
-        int lcp[length - 1];
+        vector<int> lcp(length - 1, 0);
         int curr = 0;
         for (int i = 0; i < length; i++) {
             int k = inv[i];
@@ -146,7 +146,7 @@ vector<int> toIntVector(string str) {
                 curr--;
             }
         }
-        return std::vector<int>(lcp, lcp + sizeof lcp / sizeof lcp[0]);
+        return lcp;
     }
     
     SuffixArray(vector<int> st, int ln, int ltrs) {
@@ -154,7 +154,6 @@ vector<int> toIntVector(string str) {
         letters = ltrs;
         str = st;
         idx.resize(length);
-
         build(str, &idx, length, letters);
         inv.resize(length);
         for (int i = 0; i < length; i++) {
