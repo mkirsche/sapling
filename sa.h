@@ -8,6 +8,38 @@
  
 using namespace std;
 
+struct RMQ
+{
+    vector<int> a;
+    vector<vector<int> > rmq;
+    RMQ(vector<int> aa)
+    {
+        a = aa;
+        int n = aa.size();
+        rmq.resize(n);
+        for (int i = 0; i < n; ++i)
+            rmq[i].resize(log(n)+1);
+        for(int i = 0; i<n; i++) rmq[i][0] = i;
+    		for(int j = 1; (1<<j) <= n; j++)
+    			for(int i = 0; i + (1<<j) <= n; i++)
+    				if(a[rmq[i][j-1]] < a[rmq[i+(1<<(j-1))][j-1]])
+    					rmq[i][j] = rmq[i][j-1];
+    				else rmq[i][j] = rmq[i+(1<<(j-1))][j-1];
+    }
+    RMQ(){}
+    int log(int n)
+    {
+        int res = 0;
+        while(n >= (1<<res)) res++;
+        return res-1;
+    }
+    int query(int i, int j)
+    {
+        int k = log(j - i + 1);
+    	return min(a[rmq[i][k]], a[rmq[j-(1<<k)+1][k]]);
+    }
+};
+
 vector<int> toIntVector(string str) {
     vector<int> res(str.length() + 3, 0);
     for (int i = 0; i < str.length(); i++) {
@@ -22,6 +54,8 @@ vector<int> toIntVector(string str) {
     vector<int> idx;
     vector<int> inv;
     vector<int> lcp;
+    
+    RMQ rmq;
 
     int length;
     int letters;
@@ -149,7 +183,15 @@ vector<int> toIntVector(string str) {
         return lcp;
     }
     
-    SuffixArray(vector<int> st, int ln, int ltrs) {
+    int queryLcp(int a, int b)
+    {
+        if(a == b) return length - a;
+        int x = inv[a], y = inv[b];
+        return rmq.query(min(x, y), max(x, y)-1);
+    }
+    
+    SuffixArray(vector<int> st, int ln, int ltrs)
+    {
         length = ln;
         letters = ltrs;
         str = st;
@@ -161,6 +203,7 @@ vector<int> toIntVector(string str) {
         }
 
         lcp = getLCP();
+        rmq = RMQ(lcp);
     }
     
     SuffixArray(){}
