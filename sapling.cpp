@@ -28,7 +28,6 @@ vector<int> overs, unders;
 int vals[256];
 int maxOver, maxUnder, meanError;
 int mostOver, mostUnder;
-//int* llcp, rlcp; 
 
 long long* xlist;
 long long* ylist;
@@ -83,7 +82,6 @@ int binarySearch(string s, int lo, int hi, int loLcp, int hiLcp)
 
 int plQuery(string s, long kmer)
 {
-    //cout << s << " " << kmer << endl;
 	int predicted = queryPiecewiseLinear(kmer); // Predicted position in suffix array
 	int idx = rev[predicted]; // Actual string position where we predict it to be
 	int lcp = getLcp(idx, s, 0);
@@ -291,17 +289,14 @@ int main()
 	cout << "Constructed queries" << endl;
 	// Run piece-wise linear test
 	vector<int> plAnswers(numQueries, 0);
-	long time = 0; // TODO get time
 	auto start = std::chrono::system_clock::now();
 	for(int i = 0; i<numQueries; i++)
 	{
 		plAnswers[i] = plQuery(queries[i], kmers[i]);
-	}                                                                                                                                                                                                                                                                                                                                                               	
+	}
 	
-	long curTime = 0; // TODO get time
 	auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
-	long diff = curTime - time;
 	cout << "Piecewise linear time: " << elapsed_seconds.count() << endl;
 	
 	// Check the answers
