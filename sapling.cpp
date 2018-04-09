@@ -1,6 +1,6 @@
 /*
  * SAPLING: Suffix Array Piecewise Linear INdex for Genomics
- * Note: compile with -std=c++11 for timing function to work
+ * Note: compile with -O2 -std=c++11 for timing function to work
  */
 #include <stdio.h>
 #include <fstream>
