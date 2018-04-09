@@ -52,40 +52,40 @@ int queryPiecewiseLinear(long long x)
 	return (int)predict;
 }
 
-int getLcp(int idx, string s, int start)
+int getLcp(int idx, string& s, int start, int length)
 {
 	int i = start;
-	for(; i<s.length() && idx+i < n; i++) if(s[i] != reference[idx+i]) return i;
+	for(; i<length && idx+i < n; i++) if(s[i] != reference[idx+i]) return i;
 	return i; // whole thing matches
 }
 
-int binarySearch(string s, int lo, int hi, int loLcp, int hiLcp)
+int binarySearch(string &s, int lo, int hi, int loLcp, int hiLcp, int length)
 {
 	// Base case
 	if(hi == lo + 2) return lo + 1;
 	
 	int mid = (lo + hi) >> 1;
 	int idx = rev[mid];
-	int nLcp = getLcp(idx, s, min(loLcp,  hiLcp));
+	int nLcp = getLcp(idx, s, min(loLcp,  hiLcp), length);
 	if(nLcp == s.length()) return mid;
 	if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
 	{
 		// suffix too small - search right half
-		return binarySearch(s, mid, hi, nLcp, hiLcp);
+		return binarySearch(s, mid, hi, nLcp, hiLcp, length);
 	}
 	else
 	{
 		// suffix too big - search left half
-		return binarySearch(s, lo, mid, loLcp, nLcp);
+		return binarySearch(s, lo, mid, loLcp, nLcp, length);
 	}
 }
 
-int plQuery(string s, long kmer)
+int plQuery(string &s, long kmer, int length)
 {
 	int predicted = queryPiecewiseLinear(kmer); // Predicted position in suffix array
 	int idx = rev[predicted]; // Actual string position where we predict it to be
-	int lcp = getLcp(idx, s, 0);
-	if(lcp == s.length()) return idx;
+	int lcp = getLcp(idx, s, 0, length);
+	if(lcp == length) return idx;
 	int lo, hi;
 	int loLcp = -1, hiLcp = -1;
 	if(lcp + idx == n || s[lcp] > reference[idx+lcp])
@@ -94,8 +94,8 @@ int plQuery(string s, long kmer)
 		lo = predicted;
 		hi = min(n-1, predicted+mostOver); // Over-prediction which the actual position is highly likely to not exceed
 		int hiIdx = rev[hi]; // String index corresponding to over-prediction
-		int oLcp = getLcp(hiIdx, s, 0); // LCP between over-prediction suffix and query
-		if(oLcp == s.length()) return hiIdx; // Over-prediction happened to be exactly right
+		int oLcp = getLcp(hiIdx, s, 0, length); // LCP between over-prediction suffix and query
+		if(oLcp == length) return hiIdx; // Over-prediction happened to be exactly right
 		if(oLcp + hiIdx == n || s[oLcp] > reference[hiIdx+oLcp])
 		{
 			// bad case: over-prediction still not high enough
@@ -103,8 +103,8 @@ int plQuery(string s, long kmer)
 			loLcp = oLcp;
 			hi = min(n-1, predicted + maxOver);
 			hiIdx = rev[hi];
-			oLcp = getLcp(hiIdx, s, 0);
-			if(oLcp == s.length()) return hiIdx;
+			oLcp = getLcp(hiIdx, s, 0, length);
+			if(oLcp == length) return hiIdx;
 			hiLcp = oLcp;
 		}
 		else
@@ -120,7 +120,7 @@ int plQuery(string s, long kmer)
 		lo = max(0, predicted-mostUnder);
 		hi = predicted;
 		int loIdx = rev[lo];
-		int oLcp = getLcp(loIdx, s, 0); // LCP between under-prediction suffix and query
+		int oLcp = getLcp(loIdx, s, 0, length); // LCP between under-prediction suffix and query
 		if(oLcp == s.length()) return loIdx; // Under-prediction happened to be exactly right
 		if(oLcp + loIdx == n || s[oLcp] > reference[loIdx+oLcp])
 		{
@@ -135,12 +135,12 @@ int plQuery(string s, long kmer)
 			hiLcp = oLcp;
 			lo = max(0, predicted - maxUnder);
 			loIdx = rev[lo];
-			oLcp = getLcp(loIdx, s, 0);
+			oLcp = getLcp(loIdx, s, 0, length);
 			if(oLcp == s.length()) return loIdx;
 			loLcp = oLcp;
 		}
 	}
-	return rev[binarySearch(s, lo, hi, loLcp, hiLcp)];
+	return rev[binarySearch(s, lo, hi, loLcp, hiLcp, length)];
 }
 
 int getError(int y, int predict)
@@ -201,7 +201,7 @@ void errorStats()
 	cout << mostThreshold << " of underestimates within: " << mostUnder << endl;
 }
 
-void buildPiecewiseLinear(string s, vector<int> sa)
+void buildPiecewiseLinear(string& s, vector<int> sa)
 {
 	vector<long long> xs;
 	vector<int> ys;
@@ -292,7 +292,7 @@ int main()
 	auto start = std::chrono::system_clock::now();
 	for(int i = 0; i<numQueries; i++)
 	{
-		plAnswers[i] = plQuery(queries[i], kmers[i]);
+		plAnswers[i] = plQuery(queries[i], kmers[i], queries[i].length());
 	}
 	
 	auto end = std::chrono::system_clock::now();
