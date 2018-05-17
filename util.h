@@ -16,6 +16,5 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
 
 int bad(char c)
 {
-    return c == 'N' || c == 'M' || c == 'R' || c == 'W' || c == 'X' || c == 'Y' || c == 'Z'
-        || c == 'J' || c == 'K' || c == 'L';
+    return c != 'A' && c != 'C' && c != 'G' && c != 'T';
 }
