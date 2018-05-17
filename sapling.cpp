@@ -249,15 +249,20 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
 	errorStats();
 }
 
-int main()
+int main(int argc, char **argv)
 {
+    if(argc != 3)
+    {
+        cout << "Usage: " << argv[0] << " <genome> " << " <suffix array file> " << endl;
+        return 0;
+    }
 	for(int i = 0; i<256; i++) vals[i] = 0;
 	vals['A'] = (1<<alpha)-4;
 	vals['C'] = (1<<alpha)-3;
 	vals['G'] = (1<<alpha)-2;
 	vals['T'] = (1<<alpha)-1;
 	vals['N'] = (1<<alpha)-5;
-	ifstream input("yeast.fa");
+	ifstream input(argv[1]);
 	string s;
 	string cur;
 	std::ostringstream out("");
@@ -281,7 +286,8 @@ int main()
 	
     vector<size_t> x;
 	
-    const char *fn = "sa_yeast.txt";
+    string fnString = argv[2];
+    const char *fn = fnString.c_str();
     ifstream f(fn);
     if(f.good())
     {
