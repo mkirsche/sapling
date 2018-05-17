@@ -261,11 +261,13 @@ int main()
 	string s;
 	string cur;
 	std::ostringstream out("");
+	cout << "Reading reference genome" << endl;
 	while (getline(input, cur))
 	{
 		if(cur[0] != '>') out << cur;
 	}
 	s = out.str();
+	cout << "Removing non-base characters" << endl;
     s = rep(s);
     reference = s;
     n = reference.length();
@@ -277,6 +279,7 @@ int main()
     ifstream f(fn);
     if(f.good())
     {
+        cout << "Reading suffix array from file" << endl;
         FILE *infile = fopen (fn, "rb");
         size_t size;
         fread( &size, sizeof( size_t ), 1, infile);
@@ -293,7 +296,9 @@ int main()
     }
     else
     {
+        cout << "Building suffix array" << endl;
 	    lsa = sa_init3(s, alpha);
+	    cout << "Writing suffix array to file" << endl;
 	    x = lsa.inv;
 	    FILE *outfile = fopen (fn, "wb");
 	    size_t size = x.size();
