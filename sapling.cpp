@@ -275,8 +275,6 @@ int main()
 		}
 	}
 	s = out.str();
-	cout << "Removing non-base characters" << endl;
-    s = rep(s);
     reference = s;
     n = reference.length();
     cout << s.length() << endl;

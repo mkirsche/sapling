@@ -19,19 +19,3 @@ int bad(char c)
     return c == 'N' || c == 'M' || c == 'R' || c == 'W' || c == 'X' || c == 'Y' || c == 'Z'
         || c == 'J' || c == 'K' || c == 'L';
 }
-
-string rep(string s)
-{
-    string res = s;
-    res = replaceAll(res, "N", "");
-    res = replaceAll(res, "M", "");
-    res = replaceAll(res, "R", "");
-    res = replaceAll(res, "W", "");
-    res = replaceAll(res, "X", "");
-    res = replaceAll(res, "Y", "");
-    res = replaceAll(res, "Z", "");
-    res = replaceAll(res, "J", "");
-    res = replaceAll(res, "K", "");
-    res = replaceAll(res, "L", "");
-    return res;
-}
