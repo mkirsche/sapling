@@ -264,7 +264,15 @@ int main()
 	cout << "Reading reference genome" << endl;
 	while (getline(input, cur))
 	{
-		if(cur[0] != '>') out << cur;
+		if(cur[0] != '>')
+		{
+		    for(int i = 0; i<cur.length(); i++)
+		    {
+		        if(cur[i] >= 'a' && cur[i] <= 'z') cur[i] += 'A' - 'a';
+		        if(!bad(cur[i]))
+		            out << cur[i];
+		    }
+		}
 	}
 	s = out.str();
 	cout << "Removing non-base characters" << endl;

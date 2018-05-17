@@ -14,6 +14,12 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
     return str;
 }
 
+int bad(char c)
+{
+    return c == 'N' || c == 'M' || c == 'R' || c == 'W' || c == 'X' || c == 'Y' || c == 'Z'
+        || c == 'J' || c == 'K' || c == 'L';
+}
+
 string rep(string s)
 {
     string res = s;
