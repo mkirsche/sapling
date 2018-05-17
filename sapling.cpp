@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -34,7 +35,7 @@ long long* ylist;
 
 SuffixArray lsa;
 
-long long kmerize(string s)
+long long kmerize(const string& s)
 {
     long long kmer = 0;
 	for(int i = 0; i<k; i++) kmer = (kmer << alpha) | vals[s[i]];
@@ -256,26 +257,60 @@ int main()
 	vals['G'] = (1<<alpha)-2;
 	vals['T'] = (1<<alpha)-1;
 	vals['N'] = (1<<alpha)-5;
-	ifstream input("/home/mkirsche/work/lis/yeast.fa");
+	ifstream input("chr22.fa");
 	string s;
 	string cur;
+	std::ostringstream out("");
 	while (getline(input, cur))
 	{
-		if(cur[0] != '>') s += cur;
+		if(cur[0] != '>') out << cur;
 	}
-	s = rep(s);
-	reference = s;
-	n = reference.length();
-	cout << s.length() << endl;
-	lsa = sa_init3(s, alpha);
-	vector<int> x = lsa.inv;
+	s = out.str();
+    s = rep(s);
+    reference = s;
+    n = reference.length();
+    cout << s.length() << endl;
+	
+    vector<int> x;
+	
+    const char *fn = "sa_chr22.txt";
+    ifstream f(fn);
+    if(f.good())
+    {
+        FILE *infile = fopen (fn, "rb");
+        size_t size;
+        fread( &size, sizeof( size_t ), 1, infile);
+        x.resize(size);
+        fread(&x[0], sizeof(int), size, infile);
+        
+        vector<int> lcp;
+        fread( &size, sizeof( size_t ), 1, infile);
+        lcp.resize(size);
+        fread(&lcp[0], sizeof(int), size, infile);
+        lsa = SuffixArray();
+        lsa.rmq = RMQ(lcp);
+        lsa.inv = x;
+    }
+    else
+    {
+	    lsa = sa_init3(s, alpha);
+	    x = lsa.inv;
+	    FILE *outfile = fopen (fn, "wb");
+	    size_t size = x.size();
+	    fwrite( &size, sizeof( size_t ), 1, outfile);
+	    fwrite( &x[0], sizeof(int), size, outfile);
+	    
+	    size = lsa.lcp.size();
+	    fwrite( &size, sizeof( size_t ), 1, outfile);
+	    fwrite( &lsa.lcp[0], sizeof(int), size, outfile);
+	}
 	cout << "Built suffix array of size " << x.size() << endl;
 	sa = vector<int>(n, 0); 
 	rev = vector<int>(n, 0);
 	cout << "Initialized rev and sa" << endl;
-	for(int i = 0; i<n; i++) rev[sa[i] = lsa.inv[i]] = i;
+	for(int i = 0; i<n; i++) rev[sa[i] = x[i]] = i;
 	cout << "Building Sapling" << endl;
-	buildPiecewiseLinear(reference, lsa.inv);
+	buildPiecewiseLinear(reference, x);
 	cout << "Testing Sapling" << endl;
 	int numQueries = 5000000;
 	vector<string> queries(numQueries, "");
