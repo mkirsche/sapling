@@ -21,11 +21,11 @@ int alpha = 2;
 int k = 21;
 int buckets = 15; // TODO handle cases when some buckets are empty
 double mostThreshold = 0.95;
-vector<int> sa; //sa[i] is the location in the suffix array where character i in reference appears
-vector<int> rev; // the inverse of sa sa[rev[i]] = i for all i
-int n;
+vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
+vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
+size_t n;
 vector<int> errors;
-vector<int> overs, unders;
+vector<size_t> overs, unders;
 int vals[256];
 int maxOver, maxUnder, meanError;
 int mostOver, mostUnder;
@@ -42,7 +42,7 @@ long long kmerize(const string& s)
 	return kmer;
 }
 
-int queryPiecewiseLinear(long long x)
+size_t queryPiecewiseLinear(long long x)
 {
 	int bucket = (int)(x >> (alpha*k - buckets));
 	long long xlo = xlist[bucket];
@@ -50,24 +50,24 @@ int queryPiecewiseLinear(long long x)
 	long long ylo = ylist[bucket];
 	long long yhi = ylist[bucket+1];
 	long long predict = (long long)(.5 + ylo + (yhi - ylo) * (x - xlo) * 1. / (xhi - xlo));
-	return (int)predict;
+	return (size_t)predict;
 }
 
-int getLcp(int idx, string& s, int start, int length)
+size_t getLcp(size_t idx, string& s, int start, int length)
 {
 	int i = start;
 	for(; i<length && idx+i < n; i++) if(s[i] != reference[idx+i]) return i;
 	return i; // whole thing matches
 }
 
-int binarySearch(string &s, int lo, int hi, int loLcp, int hiLcp, int length)
+size_t binarySearch(string &s, size_t lo, size_t hi, size_t loLcp, size_t hiLcp, int length)
 {
 	// Base case
 	if(hi == lo + 2) return lo + 1;
 	
-	int mid = (lo + hi) >> 1;
-	int idx = rev[mid];
-	int nLcp = getLcp(idx, s, min(loLcp,  hiLcp), length);
+	size_t mid = (lo + hi) >> 1;
+	size_t idx = rev[mid];
+	size_t nLcp = getLcp(idx, s, min(loLcp,  hiLcp), length);
 	if(nLcp == s.length()) return mid;
 	if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
 	{
@@ -81,21 +81,21 @@ int binarySearch(string &s, int lo, int hi, int loLcp, int hiLcp, int length)
 	}
 }
 
-int plQuery(string &s, long kmer, int length)
+size_t plQuery(string &s, long kmer, int length)
 {
-	int predicted = queryPiecewiseLinear(kmer); // Predicted position in suffix array
-	int idx = rev[predicted]; // Actual string position where we predict it to be
-	int lcp = getLcp(idx, s, 0, length);
+	size_t predicted = queryPiecewiseLinear(kmer); // Predicted position in suffix array
+	size_t idx = rev[predicted]; // Actual string position where we predict it to be
+	size_t lcp = getLcp(idx, s, 0, length);
 	if(lcp == length) return idx;
-	int lo, hi;
-	int loLcp = -1, hiLcp = -1;
+	size_t lo, hi;
+	size_t loLcp = -1, hiLcp = -1;
 	if(lcp + idx == n || s[lcp] > reference[idx+lcp])
 	{
 		// Suffix is smaller then query - look farther right
 		lo = predicted;
 		hi = min(n-1, predicted+mostOver); // Over-prediction which the actual position is highly likely to not exceed
-		int hiIdx = rev[hi]; // String index corresponding to over-prediction
-		int oLcp = getLcp(hiIdx, s, 0, length); // LCP between over-prediction suffix and query
+		size_t hiIdx = rev[hi]; // String index corresponding to over-prediction
+		size_t oLcp = getLcp(hiIdx, s, 0, length); // LCP between over-prediction suffix and query
 		if(oLcp == length) return hiIdx; // Over-prediction happened to be exactly right
 		if(oLcp + hiIdx == n || s[oLcp] > reference[hiIdx+oLcp])
 		{
@@ -118,10 +118,10 @@ int plQuery(string &s, long kmer, int length)
 	else
 	{
 		// Suffix is bigger than query - look farther left
-		lo = max(0, predicted-mostUnder);
+		lo = (size_t)max(0, (int)predicted-mostUnder);
 		hi = predicted;
-		int loIdx = rev[lo];
-		int oLcp = getLcp(loIdx, s, 0, length); // LCP between under-prediction suffix and query
+		size_t loIdx = rev[lo];
+		size_t oLcp = getLcp(loIdx, s, 0, length); // LCP between under-prediction suffix and query
 		if(oLcp == s.length()) return loIdx; // Under-prediction happened to be exactly right
 		if(oLcp + loIdx == n || s[oLcp] > reference[loIdx+oLcp])
 		{
@@ -134,7 +134,7 @@ int plQuery(string &s, long kmer, int length)
 			// bad case: under-prediction still not low enough
 			hi = lo;
 			hiLcp = oLcp;
-			lo = max(0, predicted - maxUnder);
+			lo = (size_t)max(0, (int)predicted-maxUnder);
 			loIdx = rev[lo];
 			oLcp = getLcp(loIdx, s, 0, length);
 			if(oLcp == s.length()) return loIdx;
@@ -144,36 +144,36 @@ int plQuery(string &s, long kmer, int length)
 	return rev[binarySearch(s, lo, hi, loLcp, hiLcp, length)];
 }
 
-int getError(int y, int predict)
+int getError(size_t y, size_t predict)
 {
 	if(y < predict)
 	{
-		int lo = y, hi = predict+1;
+		size_t lo = y, hi = predict+1;
 		while(lo < hi - 1)
 		{
-			int mid = (lo+hi)/2;
+			size_t mid = (lo+hi)/2;
 			if(lsa.queryLcp(mid, y) >= k)
 			{
 				lo = mid;
 			}
 			else hi = mid;
 		}
-		return lo - predict;
+		return (int)lo - (int)predict;
 	}
 	else if(y == predict) return 0;
 	else 
 	{
-		int lo = predict - 1, hi = y;
+		size_t lo = predict - 1, hi = y;
 		while(lo < hi - 1)
 		{
-			int mid = (lo+hi)/2;
+			size_t mid = (lo+hi)/2;
 			if(lsa.queryLcp(mid, y) >= k)
 			{
 				hi = mid;
 			}
 			else lo = mid;
 		}
-		return hi - predict;
+		return (int)hi - (int)predict;
 	}
 }
 
@@ -183,8 +183,8 @@ void errorStats()
 	maxUnder = 0;
 	maxOver = 0;
 	long tot = 0;
-	int n = overs.size() + unders.size();
-	for(int i = 0; i<n; i++)
+	size_t n = overs.size() + unders.size();
+	for(size_t i = 0; i<n; i++)
 	{
 		maxUnder = max(-errors[i], maxUnder);
 		maxOver = max(errors[i], maxOver);
@@ -196,18 +196,18 @@ void errorStats()
 	cout << "Mean error: " << meanError << endl;
 	sort(overs.begin(), overs.end());
 	sort(unders.begin(), unders.end());
-	mostOver = overs[(int)(mostThreshold * overs.size())];
-	mostUnder = unders[(int)(mostThreshold * unders.size())];
+	mostOver = overs[(size_t)(mostThreshold * overs.size())];
+	mostUnder = unders[(size_t)(mostThreshold * unders.size())];
 	cout << mostThreshold << " of overestimates within: " << mostOver << endl;
 	cout << mostThreshold << " of underestimates within: " << mostUnder << endl;
 }
 
-void buildPiecewiseLinear(string& s, vector<int> sa)
+void buildPiecewiseLinear(string& s, vector<size_t> sa)
 {
 	vector<long long> xs;
-	vector<int> ys;
+	vector<size_t> ys;
 	long long hash = kmerize(s.substr(0, k));
-	for(int i = 0; i+k<=s.length(); i++)
+	for(size_t i = 0; i+k<=s.length(); i++)
 	{
 		xs.push_back(hash);
 		ys.push_back(sa[i]);
@@ -218,10 +218,10 @@ void buildPiecewiseLinear(string& s, vector<int> sa)
 	xlist = new long long[(1<<buckets)+1];
 	ylist = new long long[(1<<buckets)+1];
 	for(int i = 0; i<(1<<buckets)+1; i++) xlist[i] = -1;
-	for(int i = 0; i<xs.size(); i++)
+	for(size_t i = 0; i<xs.size(); i++)
 	{
 		long long x = xs[i];
-		int y = ys[i];
+		size_t y = ys[i];
 		int bucket = 0;
 		bucket = (int)(x >> (alpha*k - buckets));
 		if(xlist[bucket] == -1 || xlist[bucket] > x)
@@ -238,10 +238,10 @@ void buildPiecewiseLinear(string& s, vector<int> sa)
 	errors.resize(xs.size());
 	overs.resize(0);
 	unders.resize(0);
-	for(int i = 0; i<xs.size(); i++)
+	for(size_t i = 0; i<xs.size(); i++)
 	{
-		int predict = queryPiecewiseLinear(xs[i]);
-		int y = ys[i];
+		size_t predict = queryPiecewiseLinear(xs[i]);
+		size_t y = ys[i];
 		errors[i] = getError(y, predict);
 		if(errors[i] > 0) overs.push_back(errors[i]);
 		else unders.push_back(-errors[i]);
@@ -257,7 +257,7 @@ int main()
 	vals['G'] = (1<<alpha)-2;
 	vals['T'] = (1<<alpha)-1;
 	vals['N'] = (1<<alpha)-5;
-	ifstream input("chr22.fa");
+	ifstream input("yeast.fa");
 	string s;
 	string cur;
 	std::ostringstream out("");
@@ -279,9 +279,9 @@ int main()
     n = reference.length();
     cout << s.length() << endl;
 	
-    vector<int> x;
+    vector<size_t> x;
 	
-    const char *fn = "sa_chr22.txt";
+    const char *fn = "sa_yeast.txt";
     ifstream f(fn);
     if(f.good())
     {
@@ -290,12 +290,12 @@ int main()
         size_t size;
         fread( &size, sizeof( size_t ), 1, infile);
         x.resize(size);
-        fread(&x[0], sizeof(int), size, infile);
+        fread(&x[0], sizeof(size_t), size, infile);
         
-        vector<int> lcp;
+        vector<size_t> lcp;
         fread( &size, sizeof( size_t ), 1, infile);
         lcp.resize(size);
-        fread(&lcp[0], sizeof(int), size, infile);
+        fread(&lcp[0], sizeof(size_t), size, infile);
         lsa = SuffixArray();
         lsa.rmq = RMQ(lcp);
         lsa.inv = x;
@@ -309,17 +309,17 @@ int main()
 	    FILE *outfile = fopen (fn, "wb");
 	    size_t size = x.size();
 	    fwrite( &size, sizeof( size_t ), 1, outfile);
-	    fwrite( &x[0], sizeof(int), size, outfile);
+	    fwrite( &x[0], sizeof(size_t), size, outfile);
 	    
 	    size = lsa.lcp.size();
 	    fwrite( &size, sizeof( size_t ), 1, outfile);
-	    fwrite( &lsa.lcp[0], sizeof(int), size, outfile);
+	    fwrite( &lsa.lcp[0], sizeof(size_t), size, outfile);
 	}
 	cout << "Built suffix array of size " << x.size() << endl;
-	sa = vector<int>(n, 0); 
-	rev = vector<int>(n, 0);
+	sa = vector<size_t>(n, 0); 
+	rev = vector<size_t>(n, 0);
 	cout << "Initialized rev and sa" << endl;
-	for(int i = 0; i<n; i++) rev[sa[i] = x[i]] = i;
+	for(size_t i = 0; i<n; i++) rev[sa[i] = x[i]] = i;
 	cout << "Building Sapling" << endl;
 	buildPiecewiseLinear(reference, x);
 	cout << "Testing Sapling" << endl;
@@ -328,13 +328,13 @@ int main()
 	vector<long long> kmers = vector<long long>(numQueries, 0);
 	for(int i = 0; i<numQueries; i++)
 	{
-		int idx = rand() % (n - k);
+		size_t idx = rand() % (n - k);
 		queries[i] = s.substr(idx, k);
 		kmers[i] = kmerize(queries[i]);
 	}
 	cout << "Constructed queries" << endl;
 	// Run piece-wise linear test
-	vector<int> plAnswers(numQueries, 0);
+	vector<size_t> plAnswers(numQueries, 0);
 	auto start = std::chrono::system_clock::now();
 	for(int i = 0; i<numQueries; i++)
 	{
