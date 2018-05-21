@@ -124,7 +124,7 @@ struct SuffixArray {
             }
         }
         radixPass(s12, &sa12, str, 2, n02, letters);
-	radixPass(sa12, &s12, str, 1, n02, letters);
+        radixPass(sa12, &s12, str, 1, n02, letters);
         radixPass(s12, &sa12, str, 0, n02, letters);
 
         // Checking if the suffixes are sufficiently sorted

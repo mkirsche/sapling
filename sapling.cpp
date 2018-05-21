@@ -251,41 +251,41 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
 
 int main(int argc, char **argv)
 {
-    if(argc != 3)
+    if(argc != 4)
     {
-        cout << "Usage: " << argv[0] << " <genome> " << " <suffix array file> " << endl;
+        cout << "Usage: " << argv[0] << " <genome> " << " <suffix array file> " << " <sapling file> " << endl;
         return 0;
     }
-	for(int i = 0; i<256; i++) vals[i] = 0;
-	vals['A'] = (1<<alpha)-4;
-	vals['C'] = (1<<alpha)-3;
-	vals['G'] = (1<<alpha)-2;
-	vals['T'] = (1<<alpha)-1;
-	vals['N'] = (1<<alpha)-5;
-	ifstream input(argv[1]);
-	string s;
-	string cur;
-	std::ostringstream out("");
-	cout << "Reading reference genome" << endl;
-	while (getline(input, cur))
-	{
-		if(cur[0] != '>')
-		{
-		    for(int i = 0; i<cur.length(); i++)
-		    {
-		        if(cur[i] >= 'a' && cur[i] <= 'z') cur[i] += 'A' - 'a';
-		        if(!bad(cur[i]))
-		            out << cur[i];
-		    }
-		}
-	}
-	s = out.str();
+    for(int i = 0; i<256; i++) vals[i] = 0;
+    vals['A'] = (1<<alpha)-4;
+    vals['C'] = (1<<alpha)-3;
+    vals['G'] = (1<<alpha)-2;
+    vals['T'] = (1<<alpha)-1;
+    vals['N'] = (1<<alpha)-5;
+    ifstream input(argv[1]);
+    string s;
+    string cur;
+    std::ostringstream out("");
+    cout << "Reading reference genome" << endl;
+    while (getline(input, cur))
+    {
+        if(cur[0] != '>')
+        {
+            for(int i = 0; i<cur.length(); i++)
+            {
+                if(cur[i] >= 'a' && cur[i] <= 'z') cur[i] += 'A' - 'a';
+                if(!bad(cur[i]))
+                   out << cur[i];
+            }
+        }
+    }
+    s = out.str();
     reference = s;
     n = reference.length();
     cout << s.length() << endl;
-	
+    
     vector<size_t> x;
-	
+    
     string fnString = argv[2];
     const char *fn = fnString.c_str();
     ifstream f(fn);
@@ -294,12 +294,12 @@ int main(int argc, char **argv)
         cout << "Reading suffix array from file" << endl;
         FILE *infile = fopen (fn, "rb");
         size_t size;
-        fread( &size, sizeof( size_t ), 1, infile);
+        fread(&size, sizeof(size_t), 1, infile);
         x.resize(size);
         fread(&x[0], sizeof(size_t), size, infile);
         
         vector<size_t> lcp;
-        fread( &size, sizeof( size_t ), 1, infile);
+        fread(&size, sizeof(size_t), 1, infile);
         lcp.resize(size);
         fread(&lcp[0], sizeof(size_t), size, infile);
         lsa = SuffixArray();
@@ -313,60 +313,94 @@ int main(int argc, char **argv)
     else
     {
         cout << "Building suffix array" << endl;
-	    lsa = sa_init3(s, alpha);
-	    cout << "Writing suffix array to file" << endl;
-	    x = lsa.inv;
-	    FILE *outfile = fopen (fn, "wb");
-	    size_t size = x.size();
-	    fwrite( &size, sizeof( size_t ), 1, outfile);
-	    fwrite( &x[0], sizeof(size_t), size, outfile);
-	    
-	    size = lsa.lcp.size();
-	    fwrite( &size, sizeof( size_t ), 1, outfile);
-	    fwrite( &lsa.lcp[0], sizeof(size_t), size, outfile);
-	    cout << "Making LCP RMQ" << endl;
+        lsa = sa_init3(s, alpha);
+        cout << "Writing suffix array to file" << endl;
+        x = lsa.inv;
+        FILE *outfile = fopen (fn, "wb");
+        size_t size = x.size();
+        fwrite(&size, sizeof(size_t), 1, outfile);
+        fwrite(&x[0], sizeof(size_t), size, outfile);
+        size = lsa.lcp.size();
+        fwrite(&size, sizeof(size_t), 1, outfile);
+        fwrite(&lsa.lcp[0], sizeof(size_t), size, outfile);
+        cout << "Making LCP RMQ" << endl;
         lsa.krmq = KRMQ(lsa.lcp, k);
-
         cout << "Built suffix array of size " << x.size() << endl;
-	}
-	
-	sa = vector<size_t>(n, 0); 
-	rev = vector<size_t>(n, 0);
-	cout << "Initialized rev and sa" << endl;
-	for(size_t i = 0; i<n; i++) rev[sa[i] = x[i]] = i;
-	cout << "Building Sapling" << endl;
-	buildPiecewiseLinear(reference, x);
-	cout << "Testing Sapling" << endl;
-	int numQueries = 5000000;
-	vector<string> queries(numQueries, "");
-	vector<long long> kmers = vector<long long>(numQueries, 0);
-	for(int i = 0; i<numQueries; i++)
-	{
-		size_t idx = rand() % (n - k);
-		queries[i] = s.substr(idx, k);
-		kmers[i] = kmerize(queries[i]);
-	}
-	cout << "Constructed queries" << endl;
-	// Run piece-wise linear test
-	vector<size_t> plAnswers(numQueries, 0);
-	auto start = std::chrono::system_clock::now();
-	for(int i = 0; i<numQueries; i++)
-	{
-		plAnswers[i] = plQuery(queries[i], kmers[i], queries[i].length());
-	}
-	
-	auto end = std::chrono::system_clock::now();
+    }
+    
+    cout << "Initializing rev and sa" << endl;
+    sa = vector<size_t>(n, 0); 
+    rev = vector<size_t>(n, 0);
+    cout << "Filling rev and sa" << endl;
+    for(size_t i = 0; i<n; i++) rev[sa[i] = x[i]] = i;
+    
+    string saplingfnString = argv[3];
+    const char *saplingfn = saplingfnString.c_str();
+    ifstream saplingf(saplingfn);
+    if(saplingf.good())
+    {
+        cout << "Reading Sapling from file" << endl;
+        FILE *infile = fopen (saplingfn, "rb");
+        int xlistsize;
+        fread(&xlistsize, sizeof(int), 1, infile);
+        xlist = new long long[xlistsize];
+        ylist = new long long[xlistsize];
+        fread(&xlist[0], sizeof(long long), xlistsize, infile);
+        fread(&ylist[0], sizeof(long long), xlistsize, infile);
+        fread(&maxOver, sizeof(int), 1, infile);
+        fread(&maxUnder, sizeof(int), 1, infile);
+        fread(&meanError, sizeof(int), 1, infile);
+        fread(&mostOver, sizeof(int), 1, infile);
+        fread(&mostUnder, sizeof(int), 1, infile);
+    }
+    else
+    {
+        cout << "Building Sapling" << endl;
+        buildPiecewiseLinear(reference, x);
+        cout << "Writing Sapling to file" << endl;
+        FILE *outfile = fopen (saplingfn, "wb");
+        int xlistsize = (1<<buckets)+1;
+        fwrite(&xlistsize, sizeof(int), 1, outfile);
+        fwrite(&xlist[0], sizeof(long long), xlistsize, outfile);
+        fwrite(&ylist[0], sizeof(long long), xlistsize, outfile);
+        fwrite(&maxOver, sizeof(int), 1, outfile);
+        fwrite(&maxUnder, sizeof(int), 1, outfile);
+        fwrite(&meanError, sizeof(int), 1, outfile);
+        fwrite(&mostOver, sizeof(int), 1, outfile);
+        fwrite(&mostUnder, sizeof(int), 1, outfile);
+    }
+    
+    cout << "Testing Sapling" << endl;
+    int numQueries = 5000000;
+    vector<string> queries(numQueries, "");
+    vector<long long> kmers = vector<long long>(numQueries, 0);
+    for(int i = 0; i<numQueries; i++)
+    {
+    	size_t idx = rand() % (n - k);
+    	queries[i] = s.substr(idx, k);
+    	kmers[i] = kmerize(queries[i]);
+    }
+    cout << "Constructed queries" << endl;
+    // Run piece-wise linear test
+    vector<size_t> plAnswers(numQueries, 0);
+    auto start = std::chrono::system_clock::now();
+    for(int i = 0; i<numQueries; i++)
+    {
+        plAnswers[i] = plQuery(queries[i], kmers[i], queries[i].length());
+    }
+    
+    auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
-	cout << "Piecewise linear time: " << elapsed_seconds.count() << endl;
-	
-	// Check the answers
-	int countCorrect = 0;
-	for(int i = 0; i<numQueries; i++)
-	{
-		if(plAnswers[i] + k <= n && queries[i] == s.substr(plAnswers[i], k))
-		{
-			countCorrect++;
-		}
-	}
-	cout <<"Piecewise linear correctness: " << countCorrect << " out of " << numQueries << endl;
+    cout << "Piecewise linear time: " << elapsed_seconds.count() << endl;
+    
+    // Check the answers
+    int countCorrect = 0;
+    for(int i = 0; i<numQueries; i++)
+    {
+        if(plAnswers[i] + k <= n && queries[i] == s.substr(plAnswers[i], k))
+        {
+            countCorrect++;
+        }
+    }
+    cout <<"Piecewise linear correctness: " << countCorrect << " out of " << numQueries << endl;
 }
