@@ -20,7 +20,7 @@ struct RMQ
         for (size_t i = 0; i < n; ++i)
             rmq[i].resize(log(n)+1);
         for(size_t i = 0; i<n; i++) rmq[i][0] = i;
-    		for(int j = 1; (1<<j) <= n; j++)
+    		for(size_t j = 1; (1<<j) <= n; j++)
     			for(size_t i = 0; i + (1<<j) <= n; i++)
     				if(a[rmq[i][j-1]] < a[rmq[i+(1<<(j-1))][j-1]])
     					rmq[i][j] = rmq[i][j-1];
@@ -35,7 +35,7 @@ struct RMQ
     }
     size_t query(size_t i, size_t j)
     {
-        int k = log(j - i + 1);
+        size_t k = log(j - i + 1);
     	return min(a[rmq[i][k]], a[rmq[j-(1<<k)+1][k]]);
     }
 };
