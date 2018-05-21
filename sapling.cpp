@@ -152,7 +152,7 @@ int getError(size_t y, size_t predict)
 		while(lo < hi - 1)
 		{
 			size_t mid = (lo+hi)/2;
-			if(lsa.queryLcp(mid, y) >= k)
+			if(lsa.queryLcpK(mid, y))
 			{
 				lo = mid;
 			}
@@ -167,7 +167,7 @@ int getError(size_t y, size_t predict)
 		while(lo < hi - 1)
 		{
 			size_t mid = (lo+hi)/2;
-			if(lsa.queryLcp(mid, y) >= k)
+			if(lsa.queryLcpK(mid, y))
 			{
 				hi = mid;
 			}
@@ -303,8 +303,12 @@ int main(int argc, char **argv)
         lcp.resize(size);
         fread(&lcp[0], sizeof(size_t), size, infile);
         lsa = SuffixArray();
-        lsa.rmq = RMQ(lcp);
+        
+        cout << "Constructing RMQ" << endl;
+        lsa.krmq = KRMQ(lcp, k);
         lsa.inv = x;
+        
+        cout << "Loaded suffix array of size " << x.size() << endl;
     }
     else
     {
@@ -321,9 +325,11 @@ int main(int argc, char **argv)
 	    fwrite( &size, sizeof( size_t ), 1, outfile);
 	    fwrite( &lsa.lcp[0], sizeof(size_t), size, outfile);
 	    cout << "Making LCP RMQ" << endl;
-            lsa.rmq = RMQ(lsa.lcp);
+        lsa.krmq = KRMQ(lsa.lcp, k);
+
+        cout << "Built suffix array of size " << x.size() << endl;
 	}
-	cout << "Built suffix array of size " << x.size() << endl;
+	
 	sa = vector<size_t>(n, 0); 
 	rev = vector<size_t>(n, 0);
 	cout << "Initialized rev and sa" << endl;

@@ -40,6 +40,37 @@ struct RMQ
     }
 };
 
+/*
+ * Similar to RMQ but only supports queries of the form:
+ * "Does the range a[i...j] contain only values greater than or equal to k?"
+ * Where k is a constant specified upon creation
+ * O(n) memory and precomputation, and O(1) queries
+ */
+struct KRMQ
+{
+    vector<size_t> a;
+    // b[i] is the first index x >= i such that a[x] < k
+    vector<size_t> b;
+    size_t k;
+    KRMQ(vector<size_t> aa, size_t kk)
+    {
+        a = aa;
+        k = kk;
+        size_t n = aa.size();
+        b.resize(n+1);
+        b[n] = n;
+        for(size_t i = n; i-->0 ;)
+        {
+            b[i] = (a[i] < k) ? i : b[i+1];
+        }
+    }
+    KRMQ(){}
+    int query(size_t i, size_t j)
+    {
+        return a[i] > j;
+    }
+};
+
 vector<size_t> toIntVector(string str) {
     vector<size_t> res(str.length() + 3, 0);
     for (size_t i = 0; i < str.length(); i++) {
@@ -49,13 +80,14 @@ vector<size_t> toIntVector(string str) {
     return res;
 }
  
- struct SuffixArray {
+struct SuffixArray {
     vector<size_t> str;
     vector<size_t> idx;
     vector<size_t> inv;
     vector<size_t> lcp;
     
     RMQ rmq;
+    KRMQ krmq;
 
     size_t length;
     int letters;
@@ -74,11 +106,9 @@ vector<size_t> toIntVector(string str) {
         for (size_t i = 0; i < n; i++) {
             (*b)[cnt[ref[a[i] + offset]]++] = a[i];
         }
-	cout << 'b' << endl;
     }
 
     void build(vector<size_t> str, vector<size_t>* sap, size_t n, int letters) {
-        cout << n << endl;
 	size_t n0 = (n + 2) / 3, n2 = n / 3, n02 = n0 + n2, delta = n0 - (n + 1) / 3;
         
         vector<size_t> sa12(n02 + 3, 0);
@@ -166,7 +196,6 @@ vector<size_t> toIntVector(string str) {
     vector<size_t> getLCP() {
         vector<size_t> lcp(length - 1, 0);
         size_t curr = 0;
-	cout << 'e' << endl;
         for (size_t i = 0; i < length; i++) {
             size_t k = inv[i];
             if (k < length - 1) {
@@ -181,7 +210,6 @@ vector<size_t> toIntVector(string str) {
                 curr--;
             }
         }
-	cout << 'f' << endl;
         return lcp;
     }
     
@@ -190,6 +218,13 @@ vector<size_t> toIntVector(string str) {
         if(a == b) return length - a;
         size_t x = inv[a], y = inv[b];
         return rmq.query(min(x, y), max(x, y)-1);
+    }
+    
+    int queryLcpK(size_t a, size_t b)
+    {
+        if(a == b) return (length - a) >= krmq.k;
+        size_t x = inv[a], y = inv[b];
+        return krmq.query(min(x, y), max(x, y)-1);
     }
     
     SuffixArray(vector<size_t> st, size_t ln, int ltrs)
