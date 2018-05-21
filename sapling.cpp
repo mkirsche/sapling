@@ -284,7 +284,7 @@ int main(int argc, char **argv)
     n = reference.length();
     cout << s.length() << endl;
     
-    vector<size_t> x;
+    vector<size_t> sa;
     
     string fnString = argv[2];
     const char *fn = fnString.c_str();
@@ -295,8 +295,8 @@ int main(int argc, char **argv)
         FILE *infile = fopen (fn, "rb");
         size_t size;
         fread(&size, sizeof(size_t), 1, infile);
-        x.resize(size);
-        fread(&x[0], sizeof(size_t), size, infile);
+        sa.resize(size);
+        fread(&sa[0], sizeof(size_t), size, infile);
         
         vector<size_t> lcp;
         fread(&size, sizeof(size_t), 1, infile);
@@ -306,33 +306,32 @@ int main(int argc, char **argv)
         
         cout << "Constructing RMQ" << endl;
         lsa.krmq = KRMQ(lcp, k);
-        lsa.inv = x;
+        lsa.inv = sa;
         
-        cout << "Loaded suffix array of size " << x.size() << endl;
+        cout << "Loaded suffix array of size " << sa.size() << endl;
     }
     else
     {
         cout << "Building suffix array" << endl;
         lsa = sa_init3(s, alpha);
         cout << "Writing suffix array to file" << endl;
-        x = lsa.inv;
+        sa = lsa.inv;
         FILE *outfile = fopen (fn, "wb");
-        size_t size = x.size();
+        size_t size = sa.size();
         fwrite(&size, sizeof(size_t), 1, outfile);
-        fwrite(&x[0], sizeof(size_t), size, outfile);
+        fwrite(&sa[0], sizeof(size_t), size, outfile);
         size = lsa.lcp.size();
         fwrite(&size, sizeof(size_t), 1, outfile);
         fwrite(&lsa.lcp[0], sizeof(size_t), size, outfile);
         cout << "Making LCP RMQ" << endl;
         lsa.krmq = KRMQ(lsa.lcp, k);
-        cout << "Built suffix array of size " << x.size() << endl;
+        cout << "Built suffix array of size " << sa.size() << endl;
     }
     
     cout << "Initializing rev and sa" << endl;
-    sa = vector<size_t>(n, 0); 
     rev = vector<size_t>(n, 0);
     cout << "Filling rev and sa" << endl;
-    for(size_t i = 0; i<n; i++) rev[sa[i] = x[i]] = i;
+    for(size_t i = 0; i<n; i++) rev[sa[i]] = i;
     
     string saplingfnString = argv[3];
     const char *saplingfn = saplingfnString.c_str();
@@ -356,7 +355,7 @@ int main(int argc, char **argv)
     else
     {
         cout << "Building Sapling" << endl;
-        buildPiecewiseLinear(reference, x);
+        buildPiecewiseLinear(reference, sa);
         cout << "Writing Sapling to file" << endl;
         FILE *outfile = fopen (saplingfn, "wb");
         int xlistsize = (1<<buckets)+1;
