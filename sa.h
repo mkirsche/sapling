@@ -61,7 +61,7 @@ vector<size_t> toIntVector(string str) {
     int letters;
 
     void radixPass(vector<size_t> a, vector<size_t>* b, vector<size_t> ref, size_t offset, size_t n, int letters) {
-        vector<size_t> cnt(letters+1, 0);
+	vector<size_t> cnt(letters+1, 0);
         for(int i = 0; i<letters+1; i++) cnt[i] = 0;
         for (size_t i = 0; i < n; i++) {
             cnt[ref[a[i] + offset]]++;
@@ -74,10 +74,12 @@ vector<size_t> toIntVector(string str) {
         for (size_t i = 0; i < n; i++) {
             (*b)[cnt[ref[a[i] + offset]]++] = a[i];
         }
+	cout << 'b' << endl;
     }
 
     void build(vector<size_t> str, vector<size_t>* sap, size_t n, int letters) {
-        size_t n0 = (n + 2) / 3, n2 = n / 3, n02 = n0 + n2, delta = n0 - (n + 1) / 3;
+        cout << n << endl;
+	size_t n0 = (n + 2) / 3, n2 = n / 3, n02 = n0 + n2, delta = n0 - (n + 1) / 3;
         
         vector<size_t> sa12(n02 + 3, 0);
         vector<size_t> s12(n02 + 3, 0);
@@ -92,7 +94,7 @@ vector<size_t> toIntVector(string str) {
             }
         }
         radixPass(s12, &sa12, str, 2, n02, letters);
-        radixPass(sa12, &s12, str, 1, n02, letters);
+	radixPass(sa12, &s12, str, 1, n02, letters);
         radixPass(s12, &sa12, str, 0, n02, letters);
 
         // Checking if the suffixes are sufficiently sorted
@@ -110,7 +112,6 @@ vector<size_t> toIntVector(string str) {
                 s12[sa12[i] / 3 + n0] = name;
             }
         }
-
         // Recursively sort if not, generate array if it is
         if (name < n02) {
             build(s12, &sa12, n02, name);
@@ -130,7 +131,6 @@ vector<size_t> toIntVector(string str) {
             }
         }
         radixPass(s0, &sa0, str, 0, n0, letters);
-
         // Merge
         for (size_t p = 0, t = delta, k = 0; k < n; k++) {
             size_t i = sa12[t] < n0 ? sa12[t] * 3 + 1 : (sa12[t] - n0) * 3 + 2;
@@ -166,6 +166,7 @@ vector<size_t> toIntVector(string str) {
     vector<size_t> getLCP() {
         vector<size_t> lcp(length - 1, 0);
         size_t curr = 0;
+	cout << 'e' << endl;
         for (size_t i = 0; i < length; i++) {
             size_t k = inv[i];
             if (k < length - 1) {
@@ -180,6 +181,7 @@ vector<size_t> toIntVector(string str) {
                 curr--;
             }
         }
+	cout << 'f' << endl;
         return lcp;
     }
     
@@ -201,9 +203,8 @@ vector<size_t> toIntVector(string str) {
         for (size_t i = 0; i < length; i++) {
             inv[idx[i]] = i;
         }
-
         lcp = getLCP();
-        rmq = RMQ(lcp);
+        //rmq = RMQ(lcp);
     }
     
     SuffixArray(){}

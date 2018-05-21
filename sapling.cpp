@@ -320,6 +320,8 @@ int main(int argc, char **argv)
 	    size = lsa.lcp.size();
 	    fwrite( &size, sizeof( size_t ), 1, outfile);
 	    fwrite( &lsa.lcp[0], sizeof(size_t), size, outfile);
+	    cout << "Making LCP RMQ" << endl;
+            lsa.rmq = RMQ(lsa.lcp);
 	}
 	cout << "Built suffix array of size " << x.size() << endl;
 	sa = vector<size_t>(n, 0); 
