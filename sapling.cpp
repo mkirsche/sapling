@@ -263,7 +263,6 @@ int main(int argc, char **argv)
     vals['T'] = (1<<alpha)-1;
     vals['N'] = (1<<alpha)-5;
     ifstream input(argv[1]);
-    string s;
     string cur;
     std::ostringstream out("");
     cout << "Reading reference genome" << endl;
@@ -279,10 +278,9 @@ int main(int argc, char **argv)
             }
         }
     }
-    s = out.str();
-    reference = s;
+    reference = out.str();
     n = reference.length();
-    cout << s.length() << endl;
+    cout << n << endl;
     
     vector<size_t> sa;
     
@@ -313,7 +311,7 @@ int main(int argc, char **argv)
     else
     {
         cout << "Building suffix array" << endl;
-        lsa = sa_init3(s, alpha);
+        lsa = sa_init3(reference, alpha);
         cout << "Writing suffix array to file" << endl;
         sa = lsa.inv;
         FILE *outfile = fopen (fn, "wb");
@@ -376,7 +374,7 @@ int main(int argc, char **argv)
     for(int i = 0; i<numQueries; i++)
     {
     	size_t idx = rand() % (n - k);
-    	queries[i] = s.substr(idx, k);
+    	queries[i] = reference.substr(idx, k);
     	kmers[i] = kmerize(queries[i]);
     }
     cout << "Constructed queries" << endl;
@@ -396,7 +394,7 @@ int main(int argc, char **argv)
     int countCorrect = 0;
     for(int i = 0; i<numQueries; i++)
     {
-        if(plAnswers[i] + k <= n && queries[i] == s.substr(plAnswers[i], k))
+        if(plAnswers[i] + k <= n && queries[i] == reference.substr(plAnswers[i], k))
         {
             countCorrect++;
         }
