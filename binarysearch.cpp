@@ -18,7 +18,7 @@ string reference;
 
 int k = 21;
 int alpha = 2;
-int n;
+size_t n;
 
 SuffixArray lsa;
 
