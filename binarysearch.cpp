@@ -13,6 +13,7 @@ using namespace std::chrono;
 
 vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
 vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
+vector<size_t> llcp, rlcp;
 
 string reference;
 
@@ -42,8 +43,8 @@ size_t binarySearch(string &s, size_t lo, size_t hi, size_t loLcp, size_t hiLcp,
 	
 	size_t mid = (lo + hi) >> 1;
 	size_t idx = rev[mid];
-	size_t nLcp = getLcp(idx, s, min(loLcp,  hiLcp), length);
-	if(nLcp == s.length()) return mid;
+	int nLcp = getLcp(idx, s, min(loLcp,  hiLcp), length);
+	if(nLcp == length) return mid;
 	if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
 	{
 		// suffix too small - search right half
@@ -56,6 +57,101 @@ size_t binarySearch(string &s, size_t lo, size_t hi, size_t loLcp, size_t hiLcp,
 	}
 }
 
+size_t calcRLCP(size_t lo, size_t hi);
+
+size_t calcLLCP(size_t lo, size_t hi)
+{
+    if(hi == lo + 2) return lsa.lcp[lo];
+    if(hi == lo + 1) return lsa.lcp[lo];
+	size_t mid = (lo + hi) >> 1;
+	size_t res = min(calcLLCP(lo, mid), calcRLCP(lo, mid));
+	llcp[mid] = res;
+	return res;
+}
+
+size_t calcRLCP(size_t lo, size_t hi)
+{
+    if(hi == lo + 2) return lsa.lcp[lo+1];
+    if(hi == lo + 1) return lsa.lcp[lo];
+    size_t mid = (lo + hi) >> 1;
+	size_t res = min(calcLLCP(mid, hi), calcRLCP(mid, hi));
+	rlcp[mid] = res;
+	return res;
+}
+
+static void initializeLCPs()
+{
+	llcp.resize(n);
+	rlcp.resize(n);
+	calcLLCP(0, n-k);
+	calcRLCP(0, n-k);
+}
+
+size_t fancyBinarySearch(string s, size_t lo, size_t hi, size_t loLcp, size_t hiLcp, int length)
+{
+	// Base case
+	if(hi == lo+1) return n+1;
+	if(hi == lo + 2) return lo + 1;
+	
+	// TODO make this fancier and get rid of log factor
+	size_t mid = (lo + hi) >> 1;
+		
+	if(loLcp >= hiLcp)
+	{
+		if(llcp[mid] > loLcp)
+		{
+			return fancyBinarySearch(s, mid, hi, loLcp, hiLcp, length);
+		}
+		else if(llcp[mid] == loLcp)
+		{
+			size_t idx = rev[mid];
+			int nLcp = getLcp(idx, s, loLcp, length);
+			if(nLcp == length) return mid;
+			if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
+			{
+				// suffix too small - search right half
+				return fancyBinarySearch(s, mid, hi, nLcp, hiLcp, length);
+			}
+			else
+			{
+				// suffix too big - search left half
+				return fancyBinarySearch(s, lo, mid, loLcp, nLcp, length);
+			}
+		}
+		else
+		{
+			return fancyBinarySearch(s, lo, mid, loLcp, llcp[mid], length);
+		}
+	}
+	else
+	{
+		if(rlcp[mid] > hiLcp)
+		{
+			return fancyBinarySearch(s, lo, mid, loLcp, hiLcp, length);
+		}
+		else if(rlcp[mid] == hiLcp)
+		{
+			size_t idx = rev[mid];
+			int nLcp = getLcp(idx, s, hiLcp, length);
+			if(nLcp == length) return mid;
+			if(nLcp + idx == n || s[nLcp] > reference[idx+nLcp])
+			{
+				// suffix too small - search right half
+				return fancyBinarySearch(s, mid, hi, nLcp, hiLcp, length);
+			}
+			else
+			{
+				// suffix too big - search left half
+				return fancyBinarySearch(s, lo, mid, loLcp, nLcp, length);
+			}
+		}
+		else
+		{
+			return fancyBinarySearch(s, mid, hi, rlcp[mid], hiLcp, length);
+		}
+	}
+}
+
 /*
  * Get the position in the reference of a query string using piecewise binary search
  */
@@ -65,7 +161,7 @@ int bQuery(string s)
 	if(loLcp == s.length()) return rev[0];
 	size_t hiLcp = getLcp(rev[n-k], s, 0, s.length());
 	if(hiLcp == s.length()) return rev[n-k];
-	return rev[binarySearch(s, 0, n-k, loLcp, hiLcp, s.length())];
+	return rev[fancyBinarySearch(s, 0, n-k, loLcp, hiLcp, s.length())];
 }
 
 int main(int argc, char **argv)
@@ -116,7 +212,7 @@ int main(int argc, char **argv)
         lsa = SuffixArray();
         
         cout << "Constructing RMQ" << endl;
-        lsa.krmq = KRMQ(lcp, k);
+        lsa.lcp = lcp;
         lsa.inv = sa;
         
         cout << "Loaded suffix array of size " << sa.size() << endl;
@@ -143,6 +239,9 @@ int main(int argc, char **argv)
     rev = vector<size_t>(n, 0);
     cout << "Filling rev and sa" << endl;
     for(size_t i = 0; i<n; i++) rev[sa[i]] = i;
+    
+    cout << "Initializing LCP arrays" << endl;
+    initializeLCPs();
     
     cout << "Testing binary search" << endl;
     int numQueries = 5000000;
@@ -174,6 +273,6 @@ int main(int argc, char **argv)
             countCorrect++;
         }
     }
-    cout <<"Piecewise linear correctness: " << countCorrect << " out of " << numQueries << endl;
+    cout <<"Binary search correctness: " << countCorrect << " out of " << numQueries << endl;
     return 0;
 }
