@@ -61,7 +61,7 @@ size_t calcRLCP(size_t lo, size_t hi);
 size_t calcLLCP(size_t lo, size_t hi)
 {
     if(hi == lo + 2) return lsa.lcp[lo];
-    if(hi == lo + 1) return n - rev[lo];
+    if(hi == lo + 1) return n;
 	size_t mid = (lo + hi) >> 1;
 	size_t res = min(calcLLCP(lo, mid), calcRLCP(lo, mid));
 	llcp[mid] = res;
