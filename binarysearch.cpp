@@ -155,7 +155,7 @@ size_t fancyBinarySearch(string s, size_t lo, size_t hi, size_t loLcp, size_t hi
 /*
  * Get the position in the reference of a query string using piecewise binary search
  */
-int bQuery(string s)
+size_t bQuery(string s)
 {
 	size_t loLcp = getLcp(rev[0], s, 0, s.length());
 	if(loLcp == s.length()) return rev[0];
