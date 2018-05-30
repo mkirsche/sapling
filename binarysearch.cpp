@@ -11,7 +11,6 @@
 
 using namespace std::chrono;
 
-vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
 vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
 vector<size_t> llcp, rlcp;
 
@@ -62,7 +61,7 @@ size_t calcRLCP(size_t lo, size_t hi);
 size_t calcLLCP(size_t lo, size_t hi)
 {
     if(hi == lo + 2) return lsa.lcp[lo];
-    if(hi == lo + 1) return lsa.lcp[lo];
+    if(hi == lo + 1) return n - rev[lo];
 	size_t mid = (lo + hi) >> 1;
 	size_t res = min(calcLLCP(lo, mid), calcRLCP(lo, mid));
 	llcp[mid] = res;
@@ -191,8 +190,6 @@ int main(int argc, char **argv)
     n = reference.length();
     cout << n << endl;
     
-    vector<size_t> sa;
-    
     string fnString = argv[2];
     const char *fn = fnString.c_str();
     ifstream f(fn);
@@ -202,43 +199,35 @@ int main(int argc, char **argv)
         FILE *infile = fopen (fn, "rb");
         size_t size;
         fread(&size, sizeof(size_t), 1, infile);
-        sa.resize(size);
-        fread(&sa[0], sizeof(size_t), size, infile);
-        
-        vector<size_t> lcp;
-        fread(&size, sizeof(size_t), 1, infile);
-        lcp.resize(size);
-        fread(&lcp[0], sizeof(size_t), size, infile);
         lsa = SuffixArray();
+        lsa.inv.resize(size);
+        fread(&lsa.inv[0], sizeof(size_t), size, infile);
         
-        cout << "Constructing RMQ" << endl;
-        lsa.lcp = lcp;
-        lsa.inv = sa;
+        fread(&size, sizeof(size_t), 1, infile);
+        lsa.lcp.resize(size);
+        fread(&lsa.lcp[0], sizeof(size_t), size, infile);
         
-        cout << "Loaded suffix array of size " << sa.size() << endl;
+        cout << "Loaded suffix array of size " << lsa.inv.size() << endl;
     }
     else
     {
         cout << "Building suffix array" << endl;
         lsa = sa_init3(reference, alpha);
         cout << "Writing suffix array to file" << endl;
-        sa = lsa.inv;
         FILE *outfile = fopen (fn, "wb");
-        size_t size = sa.size();
+        size_t size = lsa.inv.size();
         fwrite(&size, sizeof(size_t), 1, outfile);
-        fwrite(&sa[0], sizeof(size_t), size, outfile);
+        fwrite(&lsa.inv[0], sizeof(size_t), size, outfile);
         size = lsa.lcp.size();
         fwrite(&size, sizeof(size_t), 1, outfile);
         fwrite(&lsa.lcp[0], sizeof(size_t), size, outfile);
-        cout << "Making LCP RMQ" << endl;
-        lsa.krmq = KRMQ(lsa.lcp, k);
-        cout << "Built suffix array of size " << sa.size() << endl;
+        cout << "Built suffix array of size " << lsa.inv.size() << endl;
     }
     
     cout << "Initializing rev and sa" << endl;
     rev = vector<size_t>(n, 0);
     cout << "Filling rev and sa" << endl;
-    for(size_t i = 0; i<n; i++) rev[sa[i]] = i;
+    for(size_t i = 0; i<n; i++) rev[lsa.inv[i]] = i;
     
     cout << "Initializing LCP arrays" << endl;
     initializeLCPs();
