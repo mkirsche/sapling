@@ -11,7 +11,7 @@ using namespace std;
 struct RMQ
 {
     vector<size_t> a;
-    vector<vector<size_t>> rmq;
+    vector<vector<size_t> > rmq;
     RMQ(vector<size_t> aa)
     {
         a = aa;
