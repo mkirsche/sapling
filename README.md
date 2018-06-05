@@ -8,7 +8,7 @@ Building:
   
 Running SAPLING:  
 ./sapling <genome>  <suffix array file>  <sapling file>  
-    genome is a fatsa file containing the genome to query  
+    genome is a fasta file containing the genome to query  
     suffix array file is where the suffix array will be written to  
     sapling file is where the sapling data structure will be written to  
   
