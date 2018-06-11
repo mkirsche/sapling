@@ -1,4 +1,5 @@
 
+Buckets: 5
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -9,8 +10,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 8.18917
+Piecewise linear time: 8.80122
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 6
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -21,8 +23,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 7.32468
+Piecewise linear time: 7.40724
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 7
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -33,8 +36,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 7.3047
+Piecewise linear time: 7.96446
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 8
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -45,8 +49,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 6.34635
+Piecewise linear time: 6.42732
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 9
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -57,8 +62,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 6.17198
+Piecewise linear time: 6.27996
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 10
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -69,8 +75,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 5.65368
+Piecewise linear time: 5.55563
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 11
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -81,8 +88,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 6.07648
+Piecewise linear time: 5.29412
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 12
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -93,8 +101,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 4.88929
+Piecewise linear time: 4.66172
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 13
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -105,8 +114,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 4.57911
+Piecewise linear time: 4.45464
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 14
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -117,8 +127,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 3.81674
+Piecewise linear time: 3.83468
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 15
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -129,8 +140,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 3.78623
+Piecewise linear time: 3.75294
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 16
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -141,8 +153,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 3.24402
+Piecewise linear time: 3.21572
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 17
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -153,8 +166,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 3.22336
+Piecewise linear time: 3.22917
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 18
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -165,8 +179,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.87422
+Piecewise linear time: 2.88645
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 19
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -177,8 +192,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.63279
+Piecewise linear time: 2.7393
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 20
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -189,8 +205,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.44991
+Piecewise linear time: 2.46279
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 21
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -201,8 +218,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.43234
+Piecewise linear time: 2.46092
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 22
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -213,8 +231,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.35505
+Piecewise linear time: 2.4031
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 23
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -225,8 +244,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.31022
+Piecewise linear time: 2.32528
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 24
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -237,8 +257,9 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.33648
+Piecewise linear time: 2.35595
 Piecewise linear correctness: 5000000 out of 5000000
+Buckets: 25
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -249,5 +270,5 @@ Filling rev and sa
 Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.4519
+Piecewise linear time: 2.61007
 Piecewise linear correctness: 5000000 out of 5000000
