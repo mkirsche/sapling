@@ -1,0 +1,19 @@
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 930
+All underestimates within: 801
+Mean error: 0
+0.95 of overestimates within: 6
+0.95 of underestimates within: 0
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.48821
+Piecewise linear correctness: 5000000 out of 5000000
