@@ -251,11 +251,12 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
 
 int main(int argc, char **argv)
 {
-    if(argc != 4)
+    if(argc != 5)
     {
-        cout << "Usage: " << argv[0] << " <genome> " << " <suffix array file> " << " <sapling file> " << endl;
+        cout << "Usage: " << argv[0] << " <genome> " << " <suffix array file> " << " <sapling file> " << " <log number buckets> " << endl;
         return 0;
     }
+    buckets = atoi(argv[4]);
     for(int i = 0; i<256; i++) vals[i] = 0;
     vals['A'] = (1<<alpha)-4;
     vals['C'] = (1<<alpha)-3;
