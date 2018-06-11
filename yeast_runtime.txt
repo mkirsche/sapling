@@ -1,3 +1,4 @@
+
 Reading reference genome
 12157105
 Reading suffix array from file
@@ -5,15 +6,248 @@ Constructing RMQ
 Loaded suffix array of size 12157105
 Initializing rev and sa
 Filling rev and sa
-Building Sapling
-Computing error stats
-All overestimates within: 930
-All underestimates within: 801
-Mean error: 0
-0.95 of overestimates within: 6
-0.95 of underestimates within: 0
-Writing Sapling to file
+Reading Sapling from file
 Testing Sapling
 Constructed queries
-Piecewise linear time: 2.48821
+Piecewise linear time: 8.18917
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 7.32468
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 7.3047
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 6.34635
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 6.17198
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 5.65368
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 6.07648
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 4.88929
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 4.57911
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 3.81674
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 3.78623
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 3.24402
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 3.22336
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.87422
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.63279
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.44991
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.43234
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.35505
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.31022
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.33648
+Piecewise linear correctness: 5000000 out of 5000000
+Reading reference genome
+12157105
+Reading suffix array from file
+Constructing RMQ
+Loaded suffix array of size 12157105
+Initializing rev and sa
+Filling rev and sa
+Reading Sapling from file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.4519
 Piecewise linear correctness: 5000000 out of 5000000
