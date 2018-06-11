@@ -7,5 +7,7 @@ echo '' > $outfile
 for i in `seq 5 25`;
 do
     echo 'Buckets:' $i
-    ./sapling $1 $2 $3'_'$i $i | tee $outfile
+    ./sapling $1 $2 $3'_'$i $i >> $outfile
 done 
+
+cat 
