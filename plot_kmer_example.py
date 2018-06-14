@@ -1,7 +1,9 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import operator
 
-s = 'CATATAGA'
+s = 'CATATAGACATATAGA'
 
 n = len(s)
 
@@ -29,11 +31,11 @@ for i in range(0, n - k + 1):
         if c == 'T':
             kmer += 3
     points.append((kmer, sa[i]))
-print(points)
 points.sort(key=lambda x: x[1])
-print(points)
 xs = [x[0] for x in points]
 ys = [x[1] for x in points]
-plt.plot(xs, ys)
+plt.plot(xs, ys, linestyle='--', marker='o', color='b')
+plt.xlabel(str(k) + '-mer code')
+plt.ylabel('Position in suffix array')
 plt.savefig('kmer_example.png')
             
