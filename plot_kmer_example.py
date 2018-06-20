@@ -40,8 +40,8 @@ xs = [x[0] for x in points]
 ys = [x[1] for x in points]
 plt.figure(figsize=(10,5))
 plt.plot(xs, ys, linestyle='--', marker='o', color='b')
-plt.xticks(labellocs, labels, rotation='vertical')
-plt.xlabel(str(k) + '-mer code')
-plt.ylabel('Position in suffix array')
-plt.gcf().subplots_adjust(bottom=0.15)
+plt.xticks(labellocs, labels, rotation='vertical', size = 12)
+plt.xlabel(str(k) + '-mer code', size = 18)
+plt.ylabel('Position in suffix array', size = 18)
+plt.gcf().subplots_adjust(bottom=0.25)
 plt.savefig('kmer_example.png')
