@@ -378,6 +378,7 @@ int main(int argc, char **argv)
     	queries[i] = reference.substr(idx, k);
     	kmers[i] = kmerize(queries[i]);
     }
+    
     cout << "Constructed queries" << endl;
     // Run piece-wise linear test
     vector<size_t> plAnswers(numQueries, 0);
