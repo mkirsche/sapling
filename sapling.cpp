@@ -378,6 +378,18 @@ int main(int argc, char **argv)
     	queries[i] = reference.substr(idx, k);
     	kmers[i] = kmerize(queries[i]);
     }
+    
+    FILE *outfile = fopen ("queries.out", "w");
+    for(int i = 0; i < numQueries; i++)
+    {
+        fprintf(outfile, "@read%d\n", i+1);
+        fprintf(outfile, "%s\n", queries[i].c_str());
+        fprintf(outfile, "+\n");
+        
+        for(int j = 0; j<k; j++) fprintf(outfile, "9");
+        fprintf(outfile, "\n");
+    }
+    
     cout << "Constructed queries" << endl;
     // Run piece-wise linear test
     vector<size_t> plAnswers(numQueries, 0);
