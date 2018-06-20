@@ -3,7 +3,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import operator
 
-s = 'CATATAGACATATAGA'
+s = 'CATATAGA'
 
 n = len(s)
 
@@ -16,7 +16,8 @@ for i in range(0, n):
 k = 3
 
 points = []
-
+labels = []
+labellocs = []
 for i in range(0, n - k + 1):
     kmer = 0
     for j in range(0, k):
@@ -30,12 +31,15 @@ for i in range(0, n - k + 1):
             kmer += 2
         if c == 'T':
             kmer += 3
+    if len(labels) == 0 or s[i:i+k] != labels[len(labels)-1]:
+        labels.append(s[i:i+k])
+        labellocs.append(kmer)
     points.append((kmer, sa[i]))
 points.sort(key=lambda x: x[1])
 xs = [x[0] for x in points]
 ys = [x[1] for x in points]
 plt.plot(xs, ys, linestyle='--', marker='o', color='b')
+plt.xticks(labellocs, labels, rotation='vertical')
 plt.xlabel(str(k) + '-mer code')
 plt.ylabel('Position in suffix array')
 plt.savefig('kmer_example.png')
-            
