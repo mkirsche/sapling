@@ -38,8 +38,10 @@ for i in range(0, n - k + 1):
 points.sort(key=lambda x: x[1])
 xs = [x[0] for x in points]
 ys = [x[1] for x in points]
+plt.figure(figsize=(10,5))
 plt.plot(xs, ys, linestyle='--', marker='o', color='b')
 plt.xticks(labellocs, labels, rotation='vertical')
 plt.xlabel(str(k) + '-mer code')
 plt.ylabel('Position in suffix array')
+plt.gcf().subplots_adjust(bottom=0.15)
 plt.savefig('kmer_example.png')
