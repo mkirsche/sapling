@@ -4,7 +4,7 @@ safile=$2
 saplingfile=$3
 outfile=$4
 echo '' > $outfile
-for i in `seq 6 30`;
+for i in `seq 6 40`;
 do
     echo 'Buckets:' $i
     echo 'Buckets:' $i >> $outfile
