@@ -44,7 +44,7 @@ long long kmerize(const string& s)
 
 size_t queryPiecewiseLinear(long long x)
 {
-	int bucket = (int)(x >> (alpha*k - buckets));
+	size_t bucket = (x >> (alpha*k - buckets));
 	long long xlo = xlist[bucket];
 	long long xhi = xlist[bucket+1];
 	long long ylo = ylist[bucket];
@@ -215,24 +215,24 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
 		hash <<= 2;
 		if(i + k < s.length()) hash |= vals[s[i+k]];
 	}
-	xlist = new long long[(1<<buckets)+1];
-	ylist = new long long[(1<<buckets)+1];
-	for(int i = 0; i<(1<<buckets)+1; i++) xlist[i] = -1;
+	xlist = new long long[(1L<<buckets)+1];
+	ylist = new long long[(1L<<buckets)+1];
+	for(int i = 0; i<(1L<<buckets)+1; i++) xlist[i] = -1;
 	for(size_t i = 0; i<xs.size(); i++)
 	{
 		long long x = xs[i];
 		size_t y = ys[i];
-		int bucket = 0;
-		bucket = (int)(x >> (alpha*k - buckets));
+		size_t bucket = 0;
+		bucket = (x >> (alpha*k - buckets));
 		if(xlist[bucket] == -1 || xlist[bucket] > x)
 		{
 			xlist[bucket] = x;
 			ylist[bucket] = y;
 		}
-		if(x > xlist[(1<<buckets)])
+		if(x > xlist[(1L<<buckets)])
 		{
-			xlist[(1<<buckets)] = x;
-			ylist[(1<<buckets)] = y;
+			xlist[(1L<<buckets)] = x;
+			ylist[(1L<<buckets)] = y;
 		}
 	}
 	errors.resize(xs.size());
@@ -339,8 +339,17 @@ int main(int argc, char **argv)
     {
         cout << "Reading Sapling from file" << endl;
         FILE *infile = fopen (saplingfn, "rb");
-        int xlistsize;
-        fread(&xlistsize, sizeof(int), 1, infile);
+        size_t xlistsize;
+        if(buckets <= 30)
+        {
+            int xlsize;
+            fread(&xlsize, sizeof(int), 1, infile);
+            xlistsize = (size_t)xlsize;
+        }
+        else
+        {
+            fread(&xlistsize, sizeof(size_t), 1, infile);
+        }
         xlist = new long long[xlistsize];
         ylist = new long long[xlistsize];
         fread(&xlist[0], sizeof(long long), xlistsize, infile);
@@ -357,8 +366,16 @@ int main(int argc, char **argv)
         buildPiecewiseLinear(reference, sa);
         cout << "Writing Sapling to file" << endl;
         FILE *outfile = fopen (saplingfn, "wb");
-        int xlistsize = (1<<buckets)+1;
-        fwrite(&xlistsize, sizeof(int), 1, outfile);
+        size_t xlistsize = (1L<<buckets)+1;
+        if(buckets <= 30)
+        {
+            fwrite(&xlistsize, sizeof(int), 1, outfile);
+        }
+        else
+        {
+            int xlsize = (1<<buckets)+1;
+            fwrite(&xlsize, sizeof(int), 1, outfile);
+        }
         fwrite(&xlist[0], sizeof(long long), xlistsize, outfile);
         fwrite(&ylist[0], sizeof(long long), xlistsize, outfile);
         fwrite(&maxOver, sizeof(int), 1, outfile);
