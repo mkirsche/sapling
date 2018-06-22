@@ -5,12 +5,16 @@
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.axes as mataxes
+import matplotlib.cm as cm
+
 import sys
 import pandas
 import numpy as np
 import math
+import random
 
-subset = False
+subset = True
 
 fn = sys.argv[1]
 output = sys.argv[2]
@@ -19,8 +23,19 @@ if len(sys.argv) > 3 and sys.argv[3] == 'subset':
 with open(fn) as f:
     df = pandas.read_table(fn)
     if subset:
-        firstbucket = df[df['Bucket'] == 0]
-        firstbucket.plot(x = 'Kmer', y = 'Error', kind = 'scatter')
+        numBucketsToPlot = 10
+        colors = cm.rainbow(np.linspace(0, 1, numBucketsToPlot))
+        numbuckets = df['Bucket'].max()
+        bucketsToPlot = random.sample(xrange(numbuckets), numBucketsToPlot)
+        bucketContents = df[df['Bucket'] == bucketsToPlot[0]]
+        minKmer = bucketContents['Kmer'].min()
+        bucketContents['KmerDiff'] = bucketContents['Kmer'] - minKmer
+        ax = bucketContents.plot(x = 'KmerDiff', y = 'Error', kind = 'scatter', c = colors[0])
+        for i in range(1, numBucketsToPlot):
+            bucketContents = df[df['Bucket'] == bucketsToPlot[i]]
+            minKmer = bucketContents['Kmer'].min()
+            bucketContents['KmerDiff'] = bucketContents['Kmer'] - minKmer
+            bucketContents.plot(x = 'KmerDiff', y = 'Error', kind = 'scatter', ax = ax, c = colors[i])
     else:
         nrows = df.shape[0]
         logerrors = [float(0) for i in range(0, nrows)]
@@ -45,4 +60,4 @@ else:
     plt.xlabel('log2(Error)')
     plt.ylabel('Number of kmers')
 plt.savefig(output)           
-plt.show()
+#plt.show()
