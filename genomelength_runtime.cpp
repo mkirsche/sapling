@@ -49,6 +49,7 @@ size_t queryPiecewiseLinear(long long x)
 	long long xhi = xlist[bucket+1];
 	long long ylo = ylist[bucket];
 	long long yhi = ylist[bucket+1];
+	if(xhi == xlo) return ylo;
 	long long predict = (long long)(.5 + ylo + (yhi - ylo) * (x - xlo) * 1. / (xhi - xlo));
 	return (size_t)predict;
 }
