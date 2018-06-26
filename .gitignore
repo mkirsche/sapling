@@ -4,6 +4,6 @@
 sapling
 binarysearch
 errors
-genomelength_runtime
+*length_runtime
 sample
 *.txt_*
