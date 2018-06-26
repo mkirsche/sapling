@@ -5,5 +5,6 @@ sapling
 binarysearch
 errors
 *length_runtime
+*length_binarysearch
 sample
 *.txt_*
