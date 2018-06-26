@@ -268,7 +268,7 @@ int main(int argc, char **argv)
     string cur;
     std::ostringstream out("");
     cout << "Reading reference genome" << endl;
-    int curLength = 0;
+    size_t curLength = 0;
     while (curLength < genomeLength && getline(input, cur))
     {
         if(cur[0] != '>')
@@ -277,7 +277,10 @@ int main(int argc, char **argv)
             {
                 if(cur[i] >= 'a' && cur[i] <= 'z') cur[i] += 'A' - 'a';
                 if(!bad(cur[i]))
-                   out << cur[i];
+                {
+                    curLength++;
+                    out << cur[i];
+                }
             }
         }
     }
