@@ -11,5 +11,5 @@ for i in `seq $min $max`;
 do
     echo 'Query Length:' $i
     echo 'Query Length:' $i >> $outfile
-    ./querylength_runtime $1 'querylengthruntime_'$2'_'$buckets'_'$i 'querylengthruntime_'$3'_'$buckets'_'$i $buckets $i >> $outfile
+    ./querylength_runtime $1 $2 'querylengthruntime_'$3'_'$buckets'_'$i $buckets $i >> $outfile
 done  
