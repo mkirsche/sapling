@@ -49,6 +49,7 @@ size_t queryPiecewiseLinear(long long x)
 	long long xhi = xlist[bucket+1];
 	long long ylo = ylist[bucket];
 	long long yhi = ylist[bucket+1];
+	if(xlo == xhi) return ylo;
 	long long predict = (long long)(.5 + ylo + (yhi - ylo) * (x - xlo) * 1. / (xhi - xlo));
 	return (size_t)predict;
 }
@@ -234,6 +235,19 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
 			xlist[(1L<<buckets)] = x;
 			ylist[(1L<<buckets)] = y;
 		}
+	}
+	if(xlist[0] == -1)
+	{
+	    xlist[0] = 0;
+	    ylist[0] = 0;
+	}
+	for(int i = 1; i<(1L<<buckets)+1; i++)
+	{
+	    if(xlist[i] == -1)
+	    {
+	        xlist[i] = xlist[i-1];
+	        ylist[i] = ylist[i-1];
+	    }
 	}
 	errors.resize(xs.size());
 	overs.resize(0);
