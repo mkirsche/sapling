@@ -6,8 +6,8 @@ import sys
 import math
 import matplotlib.patches as mpatches
 
-sapcolor = 'pink'
-bscolor = 'purple'
+sapcolor = 'purple'
+bscolor = 'pink'
 
 bsfn = sys.argv[1]
 saplingfn = sys.argv[2]
