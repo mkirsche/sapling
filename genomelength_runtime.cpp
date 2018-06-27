@@ -301,7 +301,7 @@ int main(int argc, char **argv)
     reference = out.str();
     n = reference.length();
     cout << n << endl;
-    
+    while((1L<<k) * 20 < n) k++;
     vector<size_t> sa;
     
     string fnString = argv[2];

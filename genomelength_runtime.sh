@@ -12,5 +12,5 @@ do
     pow=$((2**i))
     echo 'Length:' $pow
     echo 'Length:' $pow >> $outfile
-    ./genomelength_runtime $1 'genomelengthruntime_'$2'_'$buckets'_'$pow 'genomelengthruntime_'$3'_'$buckets'_'$pow $buckets $pow >> $outfile
+    ./genomelength_runtime $1 'genomelengthruntime_'$2'_'$pow 'genomelengthruntime_'$3'_'$pow $buckets $pow >> $outfile
 done  
