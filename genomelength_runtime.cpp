@@ -283,6 +283,7 @@ int main(int argc, char **argv)
     std::ostringstream out("");
     cout << "Reading reference genome" << endl;
     size_t curLength = 0;
+    cout << "gl " << genomeLength << endl;
     while (curLength < genomeLength && getline(input, cur))
     {
         if(cur[0] != '>')
@@ -301,7 +302,6 @@ int main(int argc, char **argv)
     reference = out.str();
     n = reference.length();
     cout << n << endl;
-    buckets = 2;
     while((1L<<buckets) * 20 < n) buckets++;
     cout << buckets << endl;
     vector<size_t> sa;
