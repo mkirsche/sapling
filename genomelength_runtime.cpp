@@ -301,6 +301,7 @@ int main(int argc, char **argv)
     reference = out.str();
     n = reference.length();
     cout << n << endl;
+    buckets = 2;
     while((1L<<buckets) * 20 < n) buckets++;
     vector<size_t> sa;
     
