@@ -1,0 +1,519 @@
+
+Length: 64
+Reading reference genome
+64
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 64
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 0
+All underestimates within: 7
+Mean error: 2
+Length: 128
+Reading reference genome
+128
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 128
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 18
+All underestimates within: 0
+Mean error: 7
+0.95 of overestimates within: 17
+0.95 of underestimates within: 0
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.512435
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 256
+Reading reference genome
+256
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 256
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 37
+All underestimates within: 10
+Mean error: 14
+0.95 of overestimates within: 33
+0.95 of underestimates within: 9
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.495851
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 512
+Reading reference genome
+512
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 512
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 64
+All underestimates within: 16
+Mean error: 20
+0.95 of overestimates within: 56
+0.95 of underestimates within: 12
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.757164
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 1024
+Reading reference genome
+1024
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 1024
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 64
+All underestimates within: 16
+Mean error: 11
+0.95 of overestimates within: 54
+0.95 of underestimates within: 6
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.906882
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 2048
+Reading reference genome
+2048
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 2048
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 64
+All underestimates within: 16
+Mean error: 5
+0.95 of overestimates within: 53
+0.95 of underestimates within: 2
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.448641
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 4096
+Reading reference genome
+4096
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 4096
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 65
+All underestimates within: 16
+Mean error: 2
+0.95 of overestimates within: 51
+0.95 of underestimates within: 0
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.818575
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 8192
+Reading reference genome
+8192
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 8192
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 65
+All underestimates within: 16
+Mean error: 1
+0.95 of overestimates within: 40
+0.95 of underestimates within: 0
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 1.02669
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 16384
+Reading reference genome
+16384
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 16384
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 60
+All underestimates within: 19
+Mean error: 0
+0.95 of overestimates within: 14
+0.95 of underestimates within: 0
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.718111
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 32768
+Reading reference genome
+32768
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 32768
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 57
+All underestimates within: 32
+Mean error: 0
+0.95 of overestimates within: 4
+0.95 of underestimates within: 0
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.622172
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 65536
+Reading reference genome
+65536
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 65536
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 57
+All underestimates within: 36
+Mean error: 0
+0.95 of overestimates within: 4
+0.95 of underestimates within: 1
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 1.05113
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 131072
+Reading reference genome
+131072
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 131072
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 101
+All underestimates within: 101
+Mean error: 1
+0.95 of overestimates within: 7
+0.95 of underestimates within: 3
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 0.911706
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 262144
+Reading reference genome
+262144
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 262144
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 234
+All underestimates within: 169
+Mean error: 3
+0.95 of overestimates within: 12
+0.95 of underestimates within: 6
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 1.7374
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 524288
+Reading reference genome
+524288
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 524288
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 460
+All underestimates within: 354
+Mean error: 5
+0.95 of overestimates within: 22
+0.95 of underestimates within: 12
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 1.51156
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 1048576
+Reading reference genome
+1048576
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 1048576
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 772
+All underestimates within: 642
+Mean error: 8
+0.95 of overestimates within: 34
+0.95 of underestimates within: 23
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 2.4058
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 2097152
+Reading reference genome
+2097152
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 2097152
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 2499
+All underestimates within: 2025
+Mean error: 22
+0.95 of overestimates within: 90
+0.95 of underestimates within: 69
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 3.34121
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 4194304
+Reading reference genome
+4194304
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 4194304
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 3425
+All underestimates within: 2989
+Mean error: 36
+0.95 of overestimates within: 148
+0.95 of underestimates within: 112
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 5.01
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 8388608
+Reading reference genome
+8388608
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 8388608
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 7650
+All underestimates within: 7581
+Mean error: 67
+0.95 of overestimates within: 253
+0.95 of underestimates within: 215
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 8.69749
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 16777216
+Reading reference genome
+16777216
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 16777216
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 20794
+All underestimates within: 21559
+Mean error: 181
+0.95 of overestimates within: 682
+0.95 of underestimates within: 615
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 10.2788
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 33554432
+Reading reference genome
+33554432
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 33554432
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 45758
+All underestimates within: 48709
+Mean error: 411
+0.95 of overestimates within: 1565
+0.95 of underestimates within: 1443
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 12.8218
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 67108864
+Reading reference genome
+67108864
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 67108864
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 82884
+All underestimates within: 88545
+Mean error: 705
+0.95 of overestimates within: 2493
+0.95 of underestimates within: 2360
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 13.2777
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 134217728
+Reading reference genome
+134217728
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 134217728
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 138983
+All underestimates within: 143030
+Mean error: 1191
+0.95 of overestimates within: 3918
+0.95 of underestimates within: 3745
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 13.9516
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 268435456
+Reading reference genome
+268435456
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 268435456
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 264136
+All underestimates within: 273308
+Mean error: 2251
+0.95 of overestimates within: 6987
+0.95 of underestimates within: 6766
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 21.0073
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 536870912
+Reading reference genome
+536870912
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 536870912
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 507048
+All underestimates within: 526635
+Mean error: 4386
+0.95 of overestimates within: 13480
+0.95 of underestimates within: 13096
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 24.5403
+Piecewise linear correctness: 5000000 out of 5000000
+Length: 1073741824
+Reading reference genome
+1073741824
+Building suffix array
+Writing suffix array to file
+Making LCP RMQ
+Built suffix array of size 1073741824
+Initializing rev and sa
+Filling rev and sa
+Building Sapling
+Computing error stats
+All overestimates within: 956815
+All underestimates within: 990325
+Mean error: 8629
+0.95 of overestimates within: 26579
+0.95 of underestimates within: 25851
+Writing Sapling to file
+Testing Sapling
+Constructed queries
+Piecewise linear time: 29.4899
+Piecewise linear correctness: 5000000 out of 5000000
