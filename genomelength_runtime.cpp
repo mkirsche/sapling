@@ -303,6 +303,7 @@ int main(int argc, char **argv)
     cout << n << endl;
     buckets = 2;
     while((1L<<buckets) * 20 < n) buckets++;
+    cout << buckets << endl;
     vector<size_t> sa;
     
     string fnString = argv[2];
