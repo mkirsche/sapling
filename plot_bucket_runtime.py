@@ -29,7 +29,7 @@ with open(fn) as f:
             
 plt.scatter(bucketlist, timelist, c= sapcolor)
 plt.title('Runtime of SAPLING based on sampling frequency')
-plt.xlabel('Log_2(Number of buckets)')
+plt.xlabel('log(Number of segments)')
 plt.ylabel('Time (seconds per 5 million queries)')
 
 plt.axhline(y=bstime, color=bscolor, linestyle='-')
