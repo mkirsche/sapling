@@ -14,7 +14,7 @@ import numpy as np
 import math
 import random
 
-subset = True
+subset = False
 
 fn = sys.argv[1]
 output = sys.argv[2]
@@ -47,9 +47,12 @@ with open(fn) as f:
                 logerrors[i] = (math.log(float(val), 2))
             if val < 0:
                 logerrors[i] = (-math.log(float(-val), 2))
-        df['LogError'] = logerrors
+            logerrors[i] = val
+        df['Error'] = logerrors
         print(nrows)
-        df.plot(y='LogError', kind = 'hist')
+        borders = np.arange(-500, 500, 10)
+        df.plot(y='Error', kind = 'hist', bins = borders)
+        
 
 if subset:
     plt.title('Errors within a bucket')
@@ -57,7 +60,7 @@ if subset:
     plt.ylabel('Error')
 else:               
     plt.title('Prediction Errors of 22mers')
-    plt.xlabel('log2(Error)')
-    plt.ylabel('Number of kmers')
+    plt.xlabel('Error')
+    plt.ylabel('Number of 22mers')
 plt.savefig(output)           
 #plt.show()
