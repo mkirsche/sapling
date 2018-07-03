@@ -1,9 +1,0 @@
-Reading forward index: 00:00:06
-Time for 0-mismatch search: 00:01:15
-# reads processed: 5000000
-# reads with at least one reported alignment: 4999982 (100.00%)
-# reads that failed to align: 18 (0.00%)
-Reported 4999982 alignments to 1 output stream(s)
-Time searching: 00:01:21
-Overall time: 00:01:21
-
