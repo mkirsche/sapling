@@ -17,8 +17,8 @@ struct Sapling {
     string reference;
     int alpha = 2;
     int k = 21;
-    int buckets = 15;
-    int degree = 2;
+    int buckets = 20;
+    int degree = 1;
     double mostThreshold = 0.95;
     vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
     vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
@@ -57,6 +57,7 @@ struct Sapling {
 	        double prod = 1;
 	        for(int j = bucket; j<=bucket+deg; j++)
 	        {
+	            
 	            if(xlist[i] != xlist[j])
 	            {
 	                found++;
