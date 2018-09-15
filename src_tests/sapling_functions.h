@@ -268,14 +268,18 @@ struct Sapling {
 	    errors.resize(xs.size());
 	    overs.resize(0);
 	    unders.resize(0);
+	    FILE *outfile = fopen ("errorList.out", "w");
+	    fprintf(outfile, "x\ty\tpred\terror\n");
 	    for(size_t i = 0; i<xs.size(); i++)
 	    {
 		    size_t predict = queryPiecewise(xs[i], degree);
 		    size_t y = ys[i];
 		    errors[i] = getError(y, predict);
+		    fprintf(outfile, "%zu\t%zu\t%zu\t%d\n", xs[i], ys[i], predict, errors[i]);
 		    if(errors[i] > 0) overs.push_back(errors[i]);
 		    else unders.push_back(-errors[i]);
 	    }
+	    fclose(outfile);
 	    errorStats();
     }
     
