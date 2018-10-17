@@ -15,6 +15,4 @@ Running SAPLING:
 Running binary search:  
 ./binarysearch <genome>  <suffix array file>  
     genome is a fasta file containing the genome to query  
-    suffix array file is where the suffix array will be written to  
-  
-See results.txt for most up-to-date results.  
+    suffix array file is where the suffix array will be written to 
