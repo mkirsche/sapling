@@ -296,24 +296,28 @@ struct Sapling {
 	    errorStats();
     }
     
-    vector<double> linReg(vector<long long> xs, vector<size_t> ys)
+vector<double> linReg(vector<long long> xs, vector<size_t> ys)
     {
         size_t n = xs.size();
         double avgX = 0.0;
         double avgY = 0.0;
         for(size_t i = 0; i<n; i++)
         {
-		    avgX += xs[i] * 1.0 / n;
-		    avgY += ys[i] * 1.0 / n;
+		    avgX += xs[i];
+		    avgY += ys[i];
 		}
+        avgX /= n;
+        avgY /= n;
         double sdx = 0.0;
         double sdy = 0.0;
         for (size_t i = 0; i<n; i++)
         {
-            sdx += (xs[i] - avgX) / n * (xs[i] - avgX);
-            sdy += (ys[i] - avgY) / n * (ys[i] - avgY);
+            sdx += (xs[i] - avgX) * (xs[i] - avgX);
+            sdy += (ys[i] - avgY) * (ys[i] - avgY);
         }
+        sdx /= n;
         sdx = sqrt(sdx);
+        sdy /= n;
         sdy = sqrt(sdy);
         
         if(sdx < 1e-9)
@@ -327,13 +331,15 @@ struct Sapling {
         double r = 0.0;
         for(size_t i = 0; i<n; i++)
         {
-           r += 1.0 * xs[i] / n * ys[i];
+           r += 1.0 * xs[i] * ys[i];
         }
-        r -= avgX * avgY;
+        r -= n * avgX * avgY;
+        r /= n;
         r /= sdx;
+        double rsdy = r;
         r /= sdy;
 	
-        double slope = r * sdy / sdx;
+        double slope = rsdy / sdx;
         double intercept = avgY - slope * avgX;
         vector<double> res;
         res.push_back(slope);
@@ -415,6 +421,10 @@ struct Sapling {
 		        //printf("pred: %zu %zu %zu\n", xs[i][j], ys[i][j], predict);
 		        size_t y = ys[i][j];
 		        errors[idx] = getError(y, predict);
+		        if(errors[idx] > 1000000)
+		        {
+		            cout << xs[i][j] << " " << y << " " << predict << " " << slopeList[i] << " " << interceptList[i] << endl;
+		        }
 		        fprintf(outfile, "%zu\t%zu\t%zu\t%d\n", xs[i][j], ys[i][j], predict, errors[idx]);
 		        if(errors[idx] > 0) overs.push_back(errors[idx]);
 		        else unders.push_back(-errors[idx]);
