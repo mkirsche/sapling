@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <string>
 #include <chrono>
+#include <cmath>
 #include "sa.h"
 #include "util.h"
 
@@ -32,6 +33,9 @@ struct Sapling {
 
     long long* xlist;
     long long* ylist;
+    
+    double* slopeList;
+    double* interceptList;
 
     SuffixArray lsa;
     
@@ -40,6 +44,13 @@ struct Sapling {
         long long kmer = 0;
 	    for(int i = 0; i<k; i++) kmer = (kmer << alpha) | vals[s[i]];
 	    return kmer;
+    }
+    
+    size_t queryLinReg(long long x)
+    {
+        size_t bucket = (x >> (alpha*k - buckets));
+        if(bucket >= (1L << buckets)) bucket = (1L<<buckets) - 1;
+        return (size_t)(slopeList[bucket] * x + interceptList[bucket] + .5);
     }
     
     size_t queryPiecewise(long long x, int deg)
@@ -99,8 +110,9 @@ struct Sapling {
     }
     
     size_t plQuery(string &s, long kmer, int length)
-    {
-	    size_t predicted = queryPiecewise(kmer, degree); // Predicted position in suffix array
+    {   
+        size_t predicted = queryLinReg(kmer);
+	    //size_t predicted = queryPiecewise(kmer, degree); // Predicted position in suffix array
 	    size_t idx = rev[predicted]; // Actual string position where we predict it to be
 	    size_t lcp = getLcp(idx, s, 0, length);
 	    if(lcp == length) return idx;
@@ -217,6 +229,7 @@ struct Sapling {
 	    mostUnder = unders[(size_t)(mostThreshold * unders.size())];
 	    cout << mostThreshold << " of overestimates within: " << mostOver << endl;
 	    cout << mostThreshold << " of underestimates within: " << mostUnder << endl;
+	    cout << "testing" << endl;
     }
 
     void buildPiecewiseLinear(string& s, vector<size_t> sa)
@@ -278,6 +291,141 @@ struct Sapling {
 		    fprintf(outfile, "%zu\t%zu\t%zu\t%d\n", xs[i], ys[i], predict, errors[i]);
 		    if(errors[i] > 0) overs.push_back(errors[i]);
 		    else unders.push_back(-errors[i]);
+	    }
+	    fclose(outfile);
+	    errorStats();
+    }
+    
+    vector<double> linReg(vector<long long> xs, vector<size_t> ys)
+    {
+        size_t n = xs.size();
+        double avgX = 0.0;
+        double avgY = 0.0;
+        for(size_t i = 0; i<n; i++)
+        {
+		    avgX += xs[i];
+		    avgY += ys[i];
+		}
+        avgX /= n;
+        avgY /= n;
+        double sdx = 0.0;
+        double sdy = 0.0;
+        for (size_t i = 0; i<n; i++)
+        {
+            sdx += (xs[i] - avgX) * (xs[i] - avgX);
+            sdy += (ys[i] - avgY) * (ys[i] - avgY);
+        }
+        sdx /= n;
+        sdx = sqrt(sdx);
+        sdy /= n;
+        sdy = sqrt(sdy);
+        
+        if(sdx < 1e-9)
+        {
+            vector<double> res;
+            res.push_back(0.0);
+            res.push_back(ys[0]);
+            return res;
+        }
+	
+        double r = 0.0;
+        for(size_t i = 0; i<n; i++)
+        {
+           r += 1.0 * xs[i] * ys[i];
+        }
+        r -= n * avgX * avgY;
+        r /= n;
+        r /= sdx;
+        r /= sdy;
+	
+        double slope = r * sdy / sdx;
+        double intercept = avgY - slope * avgX;
+        vector<double> res;
+        res.push_back(slope);
+        res.push_back(intercept);
+        return res;
+    }
+    
+    void buildLinReg(string& s, vector<size_t> sa)
+    {
+        vector < vector<long long> > xs;
+        vector < vector<size_t> > ys;
+        for(size_t i = 0; i <= (1L<<buckets); i++)
+        {
+            xs.push_back(vector<long long>());
+            ys.push_back(vector<size_t>());
+        }
+	    long long hash = kmerize(s.substr(0, k));
+	    size_t tot = 0;
+	    for(size_t i = 0; i+k<=s.length(); i++)
+	    {
+	        tot++;
+	        long long x = hash;
+	        size_t bucket = (x >> (alpha*k - buckets));
+	        if(bucket >= (1L<<buckets)) bucket = (1L<<buckets)-1;
+		    xs[bucket].push_back(hash);
+		    ys[bucket].push_back(sa[i]);
+		    hash &= (1L << (2*(k-1))) - 1;
+		    hash <<= 2;
+		    if(i + k < s.length()) hash |= vals[s[i+k]];
+	    }
+	    slopeList = new double[(1L<<buckets)+1];
+	    interceptList = new double[(1L<<buckets)+1];
+	    size_t last = 0; // last bucket which actually had points
+	    for(size_t i = 0; i<(1L<<buckets)+1; i++)
+	    {
+	        if(xs[i].size() == 0)
+	        {
+	            vector<long long> nx;
+	            vector<size_t> ny;
+	            if(i == 0)
+	            {
+	                nx.push_back(0);
+	                ny.push_back(0);
+	            }
+	            else
+	            {
+	                for(size_t j = 0; j < xs[last].size(); j++)
+	                {
+	                    nx.push_back(xs[last][j]);
+	                    ny.push_back(ys[last][j]);
+	                }
+	            }
+	            vector<double> reg = linReg(nx, ny);
+	            slopeList[i] = reg[0];
+	            interceptList[i] = reg[1];
+	        }
+	        else
+	        {
+	            vector<double> reg = linReg(xs[i], ys[i]);
+	            slopeList[i] = reg[0];
+	            interceptList[i] = reg[1];
+	            last = i;
+	        }
+	    }
+	    errors.resize(tot);
+	    overs.resize(0);
+	    unders.resize(0);
+	    FILE *outfile = fopen ("errorList.out", "w");
+	    fprintf(outfile, "x\ty\tpred\terror\n");
+	    size_t idx = 0;
+	    for(size_t i = 0; i<xs.size(); i++)
+	    {
+	        //if(i%10000 == 0) printf("i: %zu %zu\n", i, xs.size());
+	        //printf("slope: %lf %lf\n", slopeList[i], interceptList[i]);
+	        for(size_t j = 0; j<xs[i].size(); j++)
+	        {
+	            //printf("j: %zu %zu\n", j, xs[i].size());
+		        size_t predict = queryLinReg(xs[i][j]);
+		        //printf("pred: %zu %zu %zu\n", xs[i][j], ys[i][j], predict);
+		        size_t y = ys[i][j];
+		        errors[idx] = getError(y, predict);
+		        fprintf(outfile, "%zu\t%zu\t%zu\t%d\n", xs[i][j], ys[i][j], predict, errors[idx]);
+		        if(errors[idx] > 0) overs.push_back(errors[idx]);
+		        else unders.push_back(-errors[idx]);
+		        
+		        idx++;
+		    }
 	    }
 	    fclose(outfile);
 	    errorStats();
@@ -379,10 +527,14 @@ struct Sapling {
             {
                 fread(&xlistsize, sizeof(size_t), 1, infile);
             }
-            xlist = new long long[xlistsize];
-            ylist = new long long[xlistsize];
-            fread(&xlist[0], sizeof(long long), xlistsize, infile);
-            fread(&ylist[0], sizeof(long long), xlistsize, infile);
+            slopeList = new double[xlistsize];
+            interceptList = new double[xlistsize];
+            fread(&slopeList[0], sizeof(double), xlistsize, infile);
+            fread(&interceptList[0], sizeof(double), xlistsize, infile);
+            //xlist = new long long[xlistsize];
+            //ylist = new long long[xlistsize];
+            //fread(&xlist[0], sizeof(long long), xlistsize, infile);
+            //fread(&ylist[0], sizeof(long long), xlistsize, infile);
             fread(&maxOver, sizeof(int), 1, infile);
             fread(&maxUnder, sizeof(int), 1, infile);
             fread(&meanError, sizeof(int), 1, infile);
@@ -392,7 +544,8 @@ struct Sapling {
         else
         {
             cout << "Building Sapling" << endl;
-            buildPiecewiseLinear(reference, sa);
+            //buildPiecewiseLinear(reference, sa);
+            buildLinReg(reference, sa);
             cout << "Writing Sapling to file" << endl;
             FILE *outfile = fopen (saplingfn, "wb");
             size_t xlistsize = (1L<<buckets)+1;
@@ -405,8 +558,10 @@ struct Sapling {
                 int xlsize = (1<<buckets)+1;
                 fwrite(&xlsize, sizeof(int), 1, outfile);
             }
-            fwrite(&xlist[0], sizeof(long long), xlistsize, outfile);
-            fwrite(&ylist[0], sizeof(long long), xlistsize, outfile);
+            fwrite(&slopeList[0], sizeof(double), xlistsize, outfile);
+            fwrite(&interceptList[0], sizeof(double), xlistsize, outfile);
+            //fwrite(&xlist[0], sizeof(long long), xlistsize, outfile);
+            //fwrite(&ylist[0], sizeof(long long), xlistsize, outfile);
             fwrite(&maxOver, sizeof(int), 1, outfile);
             fwrite(&maxUnder, sizeof(int), 1, outfile);
             fwrite(&meanError, sizeof(int), 1, outfile);
