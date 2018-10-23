@@ -303,21 +303,17 @@ struct Sapling {
         double avgY = 0.0;
         for(size_t i = 0; i<n; i++)
         {
-		    avgX += xs[i];
-		    avgY += ys[i];
+		    avgX += xs[i] * 1.0 / n;
+		    avgY += ys[i] * 1.0 / n;
 		}
-        avgX /= n;
-        avgY /= n;
         double sdx = 0.0;
         double sdy = 0.0;
         for (size_t i = 0; i<n; i++)
         {
-            sdx += (xs[i] - avgX) * (xs[i] - avgX);
-            sdy += (ys[i] - avgY) * (ys[i] - avgY);
+            sdx += (xs[i] - avgX) / n * (xs[i] - avgX);
+            sdy += (ys[i] - avgY) / n * (ys[i] - avgY);
         }
-        sdx /= n;
         sdx = sqrt(sdx);
-        sdy /= n;
         sdy = sqrt(sdy);
         
         if(sdx < 1e-9)
@@ -331,10 +327,9 @@ struct Sapling {
         double r = 0.0;
         for(size_t i = 0; i<n; i++)
         {
-           r += 1.0 * xs[i] * ys[i];
+           r += 1.0 * xs[i] / n * ys[i];
         }
-        r -= n * avgX * avgY;
-        r /= n;
+        r -= avgX * avgY;
         r /= sdx;
         r /= sdy;
 	
