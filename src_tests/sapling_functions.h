@@ -14,7 +14,7 @@
 #include "util.h"
 
 struct Sapling {
-
+    int debug = 0;
     string reference;
     int alpha = 2;
     int k = 21;
@@ -36,7 +36,7 @@ struct Sapling {
     
     double* slopeList;
     double* interceptList;
-
+    
     SuffixArray lsa;
     
     long long kmerize(const string& s)
@@ -299,21 +299,30 @@ struct Sapling {
 vector<double> linReg(vector<long long> xs, vector<size_t> ys)
     {
         size_t n = xs.size();
-        double avgX = 0.0;
-        double avgY = 0.0;
+        long double avgX = 0.0;
+        long double avgY = 0.0;
+        long long minX = xs[0];
+        long long minY = ys[0];
+        
         for(size_t i = 0; i<n; i++)
         {
-		    avgX += xs[i];
-		    avgY += ys[i];
+            if(xs[i] < minX) minX = xs[i];
+            if(ys[i] < minY) minY = ys[i];
+        }
+        
+        for(size_t i = 0; i<n; i++)
+        {
+		    avgX += xs[i] - minX;
+		    avgY += ys[i] - minY;
 		}
         avgX /= n;
         avgY /= n;
-        double sdx = 0.0;
-        double sdy = 0.0;
+        long double sdx = 0.0;
+        long double sdy = 0.0;
         for (size_t i = 0; i<n; i++)
         {
-            sdx += (xs[i] - avgX) * (xs[i] - avgX);
-            sdy += (ys[i] - avgY) * (ys[i] - avgY);
+            sdx += (xs[i] - minX - avgX) * (xs[i] - minX - avgX);
+            sdy += (ys[i] - minY - avgY) * (ys[i] - minY - avgY);
         }
         sdx /= n;
         sdx = sqrt(sdx);
@@ -328,22 +337,22 @@ vector<double> linReg(vector<long long> xs, vector<size_t> ys)
             return res;
         }
 	
-        double r = 0.0;
+        long double r = 0.0;
         for(size_t i = 0; i<n; i++)
         {
-           r += 1.0 * xs[i] * ys[i];
+           r += (long double)1.0 * (xs[i] - minX) * ((long long)ys[i] - minY);
         }
-        r -= n * avgX * avgY;
+        r -= (long double)n * avgX * avgY;
         r /= n;
         r /= sdx;
-        double rsdy = r;
+        long double rsdy = r;
         r /= sdy;
 	
-        double slope = rsdy / sdx;
-        double intercept = avgY - slope * avgX;
+        long double slope = rsdy / sdx;
+        long double intercept = avgY - slope * (avgX + minX) + minY;
         vector<double> res;
-        res.push_back(slope);
-        res.push_back(intercept);
+        res.push_back((double)slope);
+        res.push_back((double)intercept);
         return res;
     }
     
@@ -412,19 +421,25 @@ vector<double> linReg(vector<long long> xs, vector<size_t> ys)
 	    size_t idx = 0;
 	    for(size_t i = 0; i<xs.size(); i++)
 	    {
-	        //if(i%10000 == 0) printf("i: %zu %zu\n", i, xs.size());
-	        //printf("slope: %lf %lf\n", slopeList[i], interceptList[i]);
+	        if(debug)
+	        {
+	            printf("slope: %lf %lf\n", slopeList[i], interceptList[i]);
+	        }
 	        for(size_t j = 0; j<xs[i].size(); j++)
 	        {
-	            //printf("j: %zu %zu\n", j, xs[i].size());
 		        size_t predict = queryLinReg(xs[i][j]);
-		        //printf("pred: %zu %zu %zu\n", xs[i][j], ys[i][j], predict);
+		        if(debug && i>0 && (predict > ys[i][j] + 1000000 || predict + 1000000 < ys[i][j]))
+		        {
+		            printf("pred: %zu %zu %zu\n", xs[i][j], ys[i][j], predict);
+		            printf("bad error\n");
+		            for(size_t k = 0; k<xs[i].size(); k++)
+		            {
+		                printf("xy: %zu %zu\n", xs[i][k], ys[i][k]);
+		            }
+		            break;
+		        }
 		        size_t y = ys[i][j];
 		        errors[idx] = getError(y, predict);
-		        if(errors[idx] > 1000000)
-		        {
-		            cout << xs[i][j] << " " << y << " " << predict << " " << slopeList[i] << " " << interceptList[i] << endl;
-		        }
 		        fprintf(outfile, "%zu\t%zu\t%zu\t%d\n", xs[i][j], ys[i][j], predict, errors[idx]);
 		        if(errors[idx] > 0) overs.push_back(errors[idx]);
 		        else unders.push_back(-errors[idx]);
