@@ -88,6 +88,7 @@ struct SuffixArray {
     
     RMQ rmq;
     KRMQ krmq;
+    KRMQ krmq2;
 
     size_t length;
     int letters;
@@ -225,6 +226,13 @@ struct SuffixArray {
         if(a == b) return (length - a) >= krmq.k;
         size_t x = inv[a], y = inv[b];
         return krmq.query(min(x, y), max(x, y)-1);
+    }
+    
+    int queryLcpK2(size_t a, size_t b)
+    {
+        if(a == b) return (length - a) >= krmq2.k;
+        size_t x = inv[a], y = inv[b];
+        return krmq2.query(min(x, y), max(x, y)-1);
     }
     
     SuffixArray(vector<size_t> st, size_t ln, int ltrs)

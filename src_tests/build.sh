@@ -6,3 +6,4 @@ g++ -O2 -std=c++11 -o genomelength_runtime -w genomelength_runtime.cpp
 g++ -O2 -std=c++11 -o genomelength_binarysearch -w genomelength_binarysearch.cpp
 g++ -O2 -std=c++11 -o querylength_runtime -w querylength_runtime.cpp
 g++ -O2 -std=c++11 -o example -w example.cpp
+g++ -O2 -std=c++11 -o example_old -w example_old.cpp
