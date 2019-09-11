@@ -15,12 +15,12 @@ struct RMQ
     RMQ(vector<size_t> aa)
     {
         a = aa;
-        int n = aa.size();
+        size_t n = aa.size();
         rmq.resize(n);
         for (size_t i = 0; i < n; ++i)
             rmq[i].resize(log(n)+1);
         for(size_t i = 0; i<n; i++) rmq[i][0] = i;
-    		for(size_t j = 1; (1<<j) <= n; j++)
+    		for(size_t j = 1; (size_t)(1<<j) <= n; j++)
     			for(size_t i = 0; i + (1<<j) <= n; i++)
     				if(a[rmq[i][j-1]] < a[rmq[i+(1<<(j-1))][j-1]])
     					rmq[i][j] = rmq[i][j-1];
@@ -30,7 +30,7 @@ struct RMQ
     size_t log(size_t n)
     {
         size_t res = 0;
-        while(n >= (1<<res)) res++;
+        while(n >= (size_t)(1<<res)) res++;
         return res-1;
     }
     size_t query(size_t i, size_t j)
@@ -67,7 +67,7 @@ struct KRMQ
     KRMQ(){}
     int query(size_t i, size_t j)
     {
-        return a[i] > j;
+        return b[i] > j;
     }
 };
 
@@ -92,9 +92,9 @@ struct SuffixArray {
     size_t length;
     int letters;
 
-    void radixPass(vector<size_t> a, vector<size_t>* b, vector<size_t> ref, size_t offset, size_t n, int letters) {
+    void radixPass(vector<size_t> a, vector<size_t>* b, vector<size_t> ref, size_t offset, size_t n, size_t letters) {
 	vector<size_t> cnt(letters+1, 0);
-        for(int i = 0; i<letters+1; i++) cnt[i] = 0;
+        for(size_t i = 0; i<letters+1; i++) cnt[i] = 0;
         for (size_t i = 0; i < n; i++) {
             cnt[ref[a[i] + offset]]++;
         }
@@ -195,20 +195,16 @@ struct SuffixArray {
 
     vector<size_t> getLCP() {
         vector<size_t> lcp(length - 1, 0);
-        size_t curr = 0;
-        for (size_t i = 0; i < length; i++) {
-            size_t k = inv[i];
-            if (k < length - 1) {
-                int j = idx[k + 1];
-                while (i + curr < length && j + curr < length &&
-                        str[i + curr] == str[j + curr]) {
-                    curr++;
-                }
-                lcp[k] = curr;
+        for (size_t i = 0; i < length - 1; i++)
+		{
+            size_t k = idx[i];
+			size_t j = idx[i+1];
+			size_t curr = 0;
+            while (k + curr < length && j + curr < length && str[k + curr] == str[j + curr])
+			{
+                curr++;
             }
-            if (curr > 0) {
-                curr--;
-            }
+			lcp[i] = curr;
         }
         return lcp;
     }
@@ -219,6 +215,11 @@ struct SuffixArray {
         size_t x = inv[a], y = inv[b];
         return rmq.query(min(x, y), max(x, y)-1);
     }
+
+	int queryLcpFromSAPos(size_t a, size_t b)
+	{
+		return krmq.query(a, b-1);
+	}
     
     int queryLcpK(size_t a, size_t b)
     {

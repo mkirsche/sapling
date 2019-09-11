@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     vector<size_t> plAnswers(numQueries, 0);
     for(int i = 0; i<numQueries; i++)
     {
-        plAnswers[i] = sap.plQuery(queries[i], kmers[i], queries[i].length());
+        plAnswers[i] = sap.plQuery(queries[i].substr(0, sapling->k), kmers[i], queries[i].length());
     }
     
     // Check the answers

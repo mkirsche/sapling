@@ -11,11 +11,13 @@
 #include "sa.h"
 #include "util.h"
 
+FILE* errorFile;
+
 struct Sapling {
 
     string reference;
     int alpha = 2;
-    int k = 21;
+    int k = 10;
     int buckets = 15;
     double mostThreshold = 0.95;
     vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
@@ -36,7 +38,7 @@ struct Sapling {
     long long kmerize(const string& s)
     {
         long long kmer = 0;
-	    for(int i = 0; i<k; i++) kmer = (kmer << alpha) | vals[s[i]];
+	    for(int i = 0; i<k; i++) kmer = (kmer << alpha) | vals[(size_t)s[i]];
 	    return kmer;
     }
     
@@ -47,6 +49,7 @@ struct Sapling {
 	    long long xhi = xlist[bucket+1];
 	    long long ylo = ylist[bucket];
 	    long long yhi = ylist[bucket+1];
+		//cout << bucket << " " << xlo << " " << xhi << " " << ylo << " " << yhi << endl;
 	    if(xlo == xhi) return ylo;
 	    long long predict = (long long)(.5 + ylo + (yhi - ylo) * (x - xlo) * 1. / (xhi - xlo));
 	    return (size_t)predict;
@@ -80,7 +83,7 @@ struct Sapling {
 	    }
     }
     
-    size_t plQuery(string &s, long kmer, int length)
+    size_t plQuery(string &s, long kmer, size_t length)
     {
 	    size_t predicted = queryPiecewiseLinear(kmer); // Predicted position in suffix array
 	    size_t idx = rev[predicted]; // Actual string position where we predict it to be
@@ -142,6 +145,37 @@ struct Sapling {
 	    }
 	    return rev[binarySearch(s, lo, hi, loLcp, hiLcp, length)];
     }
+
+	size_t MAX_HITS = 32;
+	size_t countHitsRight(int sa_pos)
+	{
+		int lo = sa_pos, hi = sa_pos + MAX_HITS;
+		if(hi > (int)(n - k)) hi = n - k + 1;
+		while(hi > lo + 1)
+		{
+			int mid = (lo + hi)/2;
+			if(lsa.queryLcpFromSAPos(sa_pos, mid))
+				lo = mid;
+			else
+				hi = mid;
+		}
+		return lo - sa_pos;
+	}
+
+	size_t countHitsLeft(int sa_pos)
+	{
+		int  lo = sa_pos - MAX_HITS, hi = sa_pos;
+		if(lo < 0) lo = -1;
+		while(hi > lo + 1)
+		{
+			int mid = (lo + hi)/2;
+			if(lsa.queryLcpFromSAPos(mid, sa_pos))
+				hi = mid;
+			else
+				lo = mid;
+		}
+		return sa_pos - hi;
+	}
     
     int getError(size_t y, size_t predict)
     {
@@ -183,8 +217,10 @@ struct Sapling {
 	    maxOver = 0;
 	    long tot = 0;
 	    size_t n = overs.size() + unders.size();
+        errorFile = fopen("errors.txt", "w");
 	    for(size_t i = 0; i<n; i++)
 	    {
+            fprintf(errorFile, "%d\n", errors[i]);
 		    maxUnder = max(-errors[i], maxUnder);
 		    maxOver = max(errors[i], maxOver);
 		    tot += abs(errors[i]);
@@ -203,6 +239,9 @@ struct Sapling {
 
     void buildPiecewiseLinear(string& s, vector<size_t> sa)
     {
+        buckets = 1;
+        while((size_t)(1L<<buckets) * 40 <= s.length()) buckets++;
+        printf("Buckets (log): %d\n", buckets);
 	    vector<long long> xs;
 	    vector<size_t> ys;
 	    long long hash = kmerize(s.substr(0, k));
@@ -212,11 +251,11 @@ struct Sapling {
 		    ys.push_back(sa[i]);
 		    hash &= (1L << (2*(k-1))) - 1;
 		    hash <<= 2;
-		    if(i + k < s.length()) hash |= vals[s[i+k]];
+		    if(i + k < s.length()) hash |= vals[(size_t)s[i+k]];
 	    }
 	    xlist = new long long[(1L<<buckets)+1];
 	    ylist = new long long[(1L<<buckets)+1];
-	    for(int i = 0; i<(1L<<buckets)+1; i++) xlist[i] = -1;
+	    for(size_t i = 0; i<(size_t)(1L<<buckets)+1; i++) xlist[i] = -1;
 	    for(size_t i = 0; i<xs.size(); i++)
 	    {
 		    long long x = xs[i];
@@ -239,7 +278,7 @@ struct Sapling {
 	        xlist[0] = 0;
 	        ylist[0] = 0;
 	    }
-	    for(int i = 1; i<(1L<<buckets)+1; i++)
+	    for(size_t i = 1; i<(size_t)(1L<<buckets)+1; i++)
 	    {
 	        if(xlist[i] == -1)
 	        {
@@ -277,7 +316,7 @@ struct Sapling {
         {
             if(cur[0] != '>')
             {
-                for(int i = 0; i<cur.length(); i++)
+                for(size_t i = 0; i<cur.length(); i++)
                 {
                     if(cur[i] >= 'a' && cur[i] <= 'z') cur[i] += 'A' - 'a';
                     if(!bad(cur[i]))
@@ -291,8 +330,7 @@ struct Sapling {
         string saplingfnString = refFnString + ".sap";
         
         n = reference.length();
-        
-        vector<size_t> sa;
+        //vector<size_t> sa;
     
         const char *fn = fnString.c_str();
         ifstream f(fn);
@@ -301,17 +339,22 @@ struct Sapling {
             cout << "Reading suffix array from file" << endl;
             FILE *infile = fopen (fn, "rb");
             size_t size;
-            fread(&size, sizeof(size_t), 1, infile);
+            size_t err = fread(&size, sizeof(size_t), 1, infile);
             sa.resize(size);
-            fread(&sa[0], sizeof(size_t), size, infile);
+            err = fread(&sa[0], sizeof(size_t), size, infile);
             
             vector<size_t> lcp;
-            fread(&size, sizeof(size_t), 1, infile);
+            err = fread(&size, sizeof(size_t), 1, infile);
             lcp.resize(size);
-            fread(&lcp[0], sizeof(size_t), size, infile);
+            err = fread(&lcp[0], sizeof(size_t), size, infile);
+			if(err != size)
+			{
+				cerr << "Error reading suffix array from file" << endl;
+			}
             lsa = SuffixArray();
             
             cout << "Constructing RMQ" << endl;
+			lsa.lcp = lcp;
             lsa.krmq = KRMQ(lcp, k);
             lsa.inv = sa;
             
@@ -350,22 +393,34 @@ struct Sapling {
             if(buckets <= 30)
             {
                 int xlsize;
-                fread(&xlsize, sizeof(int), 1, infile);
+                int err = fread(&xlsize, sizeof(int), 1, infile);
+				if(err != 1)
+				{
+					cerr << "Error reading sapling data structure fom file" << endl;
+				}
                 xlistsize = (size_t)xlsize;
             }
             else
             {
-                fread(&xlistsize, sizeof(size_t), 1, infile);
+                int err = fread(&xlistsize, sizeof(size_t), 1, infile);
+				if(err != 1)
+				{
+					cerr << "Error reading sapling data structure from file" << endl;
+				}
             }
             xlist = new long long[xlistsize];
             ylist = new long long[xlistsize];
-            fread(&xlist[0], sizeof(long long), xlistsize, infile);
-            fread(&ylist[0], sizeof(long long), xlistsize, infile);
-            fread(&maxOver, sizeof(int), 1, infile);
-            fread(&maxUnder, sizeof(int), 1, infile);
-            fread(&meanError, sizeof(int), 1, infile);
-            fread(&mostOver, sizeof(int), 1, infile);
-            fread(&mostUnder, sizeof(int), 1, infile);
+            int err = fread(&xlist[0], sizeof(long long), xlistsize, infile);
+            err = fread(&ylist[0], sizeof(long long), xlistsize, infile);
+            err = fread(&maxOver, sizeof(int), 1, infile);
+            err = fread(&maxUnder, sizeof(int), 1, infile);
+            err = fread(&meanError, sizeof(int), 1, infile);
+            err = fread(&mostOver, sizeof(int), 1, infile);
+            err = fread(&mostUnder, sizeof(int), 1, infile);
+			if(err != 1)
+			{
+				cerr << "Error reading sapling data structure from file" << endl;
+			}
         }
         else
         {
