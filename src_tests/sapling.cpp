@@ -24,8 +24,8 @@ double mostThreshold = 0.95;
 vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
 vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
 size_t n;
-vector<int> errors;
-vector<size_t> overs, unders;
+vector<long long> errors;
+vector<int> overs, unders;
 int vals[256];
 int maxOver, maxUnder, meanError;
 int mostOver, mostUnder;
@@ -34,6 +34,22 @@ long long* xlist;
 long long* ylist;
 
 SuffixArray lsa;
+
+string decode(long long val)
+{
+  string res = "";
+  for(int i = 0; i<k; i++)
+  {
+    long long cur = val%4;
+    string c = "T";
+    if(cur == 0) c = "A";
+    else if(cur == 1) c = "C";
+    else if(cur == 2) c = "G";  
+    res = c + res;
+    val /= 4;
+  }
+  return res;
+}
 
 long long kmerize(const string& s)
 {
@@ -180,15 +196,15 @@ int getError(size_t y, size_t predict)
 
 void errorStats()
 {
-    cout << "Computing error stats" << endl;
+  cout << "Computing error stats" << endl;
 	maxUnder = 0;
 	maxOver = 0;
 	long tot = 0;
 	size_t n = overs.size() + unders.size();
 	for(size_t i = 0; i<n; i++)
 	{
-		maxUnder = max(-errors[i], maxUnder);
-		maxOver = max(errors[i], maxOver);
+		maxUnder = max((int)(-1) * (int)errors[i], maxUnder);
+		maxOver = max((int)errors[i], maxOver);
 		tot += abs(errors[i]);
 	}
 	cout << "All overestimates within: " << maxOver << endl;
@@ -252,14 +268,39 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
 	errors.resize(xs.size());
 	overs.resize(0);
 	unders.resize(0);
+  printf("(%ld, %ld) to (%ld, %ld)\n", xlist[0], ylist[0], xlist[1], ylist[1]);
+  printf("(%ld, %ld) to (%ld, %ld)\n", xlist[(1L<<buckets)+1-2], ylist[(1L<<buckets)+1-2], xlist[(1L<<buckets)+1-1], ylist[(1L<<buckets)+1-1]);
+  FILE *tmpFout1 = fopen("errorsfirst.txt", "w"), *tmpFout2 = fopen("errorslast.txt", "w"), *tmpFout3 = fopen("allerrors.txt", "w");
 	for(size_t i = 0; i<xs.size(); i++)
 	{
 		size_t predict = queryPiecewiseLinear(xs[i]);
 		size_t y = ys[i];
+
 		errors[i] = getError(y, predict);
 		if(errors[i] > 0) overs.push_back(errors[i]);
 		else unders.push_back(-errors[i]);
+
+    fprintf(tmpFout3, "%ld %ld %ld %ld\n", xs[i], ys[i], predict, errors[i]);
+    
+    if(xs[i] > xlist[1] && xs[i] < xlist[(1L<<buckets)+1-2])
+    {
+      fprintf(tmpFout3, "%ld %ld %ld %ld\n", xs[i], ys[i], predict, errors[i]);
+    }
+    else if(xs[i] <= xlist[1])
+    {
+      string d = decode(xs[i]);
+      //cout << i << " " << xs[i] << " " << ys[i] << " " << reference.substr(i, k) << " " << d << endl;
+
+      fprintf(tmpFout1, "%ld %ld %ld\n", xs[i], ys[i], predict);
+    }
+    else
+    {
+      fprintf(tmpFout2, "%ld %ld %ld\n", xs[i], ys[i], predict);
+    }
 	}
+  fclose(tmpFout1);
+  fclose(tmpFout2);
+  fclose(tmpFout3);
 	errorStats();
 }
 
