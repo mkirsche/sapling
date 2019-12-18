@@ -284,18 +284,18 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
     
     if(xs[i] > xlist[1] && xs[i] < xlist[(1L<<buckets)+1-2])
     {
-      fprintf(tmpFout3, "%ld %ld %ld %ld\n", xs[i], ys[i], predict, errors[i]);
+      //fprintf(tmpFout3, "%ld %ld %ld %ld\n", xs[i], ys[i], predict, errors[i]);
     }
     else if(xs[i] <= xlist[1])
     {
       string d = decode(xs[i]);
       //cout << i << " " << xs[i] << " " << ys[i] << " " << reference.substr(i, k) << " " << d << endl;
 
-      fprintf(tmpFout1, "%ld %ld %ld\n", xs[i], ys[i], predict);
+      //fprintf(tmpFout1, "%ld %ld %ld\n", xs[i], ys[i], predict);
     }
     else
     {
-      fprintf(tmpFout2, "%ld %ld %ld\n", xs[i], ys[i], predict);
+      //fprintf(tmpFout2, "%ld %ld %ld\n", xs[i], ys[i], predict);
     }
 	}
   fclose(tmpFout1);
@@ -381,6 +381,8 @@ int main(int argc, char **argv)
         lsa.krmq = KRMQ(lsa.lcp, k);
         cout << "Built suffix array of size " << sa.size() << endl;
     }
+    std::vector<size_t> newlcp;
+    newlcp.swap(lsa.lcp);
     
     cout << "Initializing rev and sa" << endl;
     rev = vector<size_t>(n, 0);

@@ -67,7 +67,7 @@ struct KRMQ
     KRMQ(){}
     int query(size_t i, size_t j)
     {
-        return a[i] > j;
+        return b[i] > j;
     }
 };
 
