@@ -8,182 +8,170 @@
  
 using namespace std;
 
-struct RMQ
-{
-    vector<size_t> a;
-    vector<vector<size_t> > rmq;
-    RMQ(vector<size_t> aa)
-    {
-        a = aa;
-        size_t n = aa.size();
-        rmq.resize(n);
-        for (size_t i = 0; i < n; ++i)
-            rmq[i].resize(log(n)+1);
-        for(size_t i = 0; i<n; i++) rmq[i][0] = i;
-    		for(size_t j = 1; (size_t)(1<<j) <= n; j++)
-    			for(size_t i = 0; i + (1<<j) <= n; i++)
-    				if(a[rmq[i][j-1]] < a[rmq[i+(1<<(j-1))][j-1]])
-    					rmq[i][j] = rmq[i][j-1];
-    				else rmq[i][j] = rmq[i+(1<<(j-1))][j-1];
-    }
-    RMQ(){}
-    size_t log(size_t n)
-    {
-        size_t res = 0;
-        while(n >= (size_t)(1<<res)) res++;
-        return res-1;
-    }
-    size_t query(size_t i, size_t j)
-    {
-        size_t k = log(j - i + 1);
-    	return min(a[rmq[i][k]], a[rmq[j-(1<<k)+1][k]]);
-    }
-};
-
-/*
- * Similar to RMQ but only supports queries of the form:
- * "Does the range a[i...j] contain only values greater than or equal to k?"
- * Where k is a constant specified upon creation
- * O(n) memory and precomputation, and O(1) queries
- */
-struct KRMQ
-{
-    vector<size_t> a;
-    // b[i] is the first index x >= i such that a[x] < k
-    vector<size_t> b;
-    size_t k;
-    KRMQ(vector<size_t> aa, size_t kk)
-    {
-        a = aa;
-        k = kk;
-        size_t n = aa.size();
-        b.resize(n+1);
-        b[n] = n;
-        for(size_t i = n; i-->0 ;)
-        {
-            b[i] = (a[i] < k) ? i : b[i+1];
-        }
-    }
-    KRMQ(){}
-    int query(size_t i, size_t j)
-    {
-        return b[i] > j;
-    }
-};
-
 vector<size_t> toIntVector(string str) {
     vector<size_t> res(str.length() + 3, 0);
     for (size_t i = 0; i < str.length(); i++) {
-        res[i] = str[i] - 'A' + 1;
+        res[i] = (size_t)(str[i] - 'A' + 1);
     }
-    res[str.length()] = res[str.length()+1] = res[str.length()+2] = 0;
+    res[str.length()] = res[str.length()+1] = res[str.length()+2] = (size_t)0;
     return res;
 }
  
 struct SuffixArray {
+
     vector<size_t> str;
     vector<size_t> idx;
     vector<size_t> inv;
     vector<size_t> lcp;
     
-    RMQ rmq;
-    KRMQ krmq;
+    size_t krmqk;
+    vector<size_t> krmqb;
 
-    size_t length;
-    int letters;
-
-    void radixPass(vector<size_t> a, vector<size_t>* b, vector<size_t> ref, size_t offset, size_t n, size_t letters) {
-	vector<size_t> cnt(letters+1, 0);
-        for(size_t i = 0; i<letters+1; i++) cnt[i] = 0;
-        for (size_t i = 0; i < n; i++) {
-            cnt[ref[a[i] + offset]]++;
-        }
-        for (size_t i = 0, sum = 0; i <= letters; i++) {
-            size_t t = cnt[i];
-            cnt[i] = sum;
-            sum += t;
-        }
-        for (size_t i = 0; i < n; i++) {
-            (*b)[cnt[ref[a[i] + offset]]++] = a[i];
-        }
+    // Say for each position in the lcp array, where the next lcp value < k starting there
+    void krmq_init(size_t kk)
+    {
+      krmqk = kk;
+      size_t n = lcp.size();
+      krmqb.resize(n+1);
+      krmqb[n] = n;
+      for(size_t i = n; i-->0 ;)
+      {
+          krmqb[i] = (lcp[i] < krmqk) ? i : krmqb[i+1];
+      }
     }
 
-    void build(vector<size_t> str, vector<size_t>* sap, size_t n, int letters) {
-	size_t n0 = (n + 2) / 3, n2 = n / 3, n02 = n0 + n2, delta = n0 - (n + 1) / 3;
+    // Whether suffixes indexed i and j in sorted order have LCP >= k
+    // Assumes i < j
+    int krmq_query(size_t i, size_t j)
+    {
+        //cout << i << " " << j << " " << krmqb[i] << endl;
+        return (i == j) || (krmqb[i] > j);
+    }
+
+    size_t length = 0;
+    size_t letters = 0;
+
+    void radixPass(vector<size_t> a, vector<size_t>* b, vector<size_t> ref, size_t offset, size_t n, size_t letters)
+    {
+	    vector<size_t> cnt(letters+1, 0);
+      for(size_t i = 0; i<letters+1; i++) cnt[i] = 0;
+      for (size_t i = 0; i < n; i++)
+      {
+        cnt[(size_t)(ref[a[i] + offset])]++;
+      }
+      for (size_t i = 0, sum = 0; i <= letters; i++)
+      {
+        size_t t = cnt[i];
+        cnt[i] = sum;
+        sum += t;
+      }
+      for (size_t i = 0; i < n; i++)
+      {
+        (*b)[cnt[(size_t)(ref[a[i] + offset])]++] = a[i];
+      }
+    }
+
+    void build(vector<size_t> str, vector<size_t>* sap, size_t n, size_t letters) 
+    {
+      size_t n0 = (n + 2) / 3, n2 = n / 3, n02 = n0 + n2, delta = n0 - (n + 1) / 3;
         
-        vector<size_t> sa12(n02 + 3, 0);
-        vector<size_t> s12(n02 + 3, 0);
+      vector<size_t> sa12(n02 + 3, 0);
+      vector<size_t> s12(n02 + 3, 0);
         
-        vector<size_t> sa0(n0, 0);
-        vector<size_t> s0(n0, 0);
+      vector<size_t> sa0(n0, 0);
+      vector<size_t> s0(n0, 0);
 
-        // Sorting two thirds
-        for (size_t i = 0, j = 0; i < n + delta; i++) {
-            if (i % 3 > 0) {
-                s12[j++] = i;
-            }
-        }
-        radixPass(s12, &sa12, str, 2, n02, letters);
-        radixPass(sa12, &s12, str, 1, n02, letters);
-        radixPass(s12, &sa12, str, 0, n02, letters);
+      // Sorting two thirds
+      for (size_t i = 0, j = 0; i < n + delta; i++)
+      {
+          if (i % 3 > 0) 
+          {
+            s12[j++] = i;
+          }
+      }
+      radixPass(s12, &sa12, str, 2, n02, letters);
+      radixPass(sa12, &s12, str, 1, n02, letters);
+      radixPass(s12, &sa12, str, 0, n02, letters);
 
-        // Checking if the suffixes are sufficiently sorted
-        size_t name = 0, c0 = -1, c1 = -1, c2 = -1;
-        for (size_t i = 0; i < n02; i++) {
-            if (str[sa12[i]] != c0 || str[sa12[i] + 1] != c1 || str[sa12[i] + 2] != c2) {
-                name++;
-                c0 = str[sa12[i]];
-                c1 = str[sa12[i] + 1];
-                c2 = str[sa12[i] + 2];
-            }
-            if (sa12[i] % 3 == 1) {
-                s12[sa12[i] / 3] = name;
-            } else {
-                s12[sa12[i] / 3 + n0] = name;
-            }
+      // Checking if the suffixes are sufficiently sorted
+      size_t name = 0, c0 = -1, c1 = -1, c2 = -1;
+      for (size_t i = 0; i < n02; i++)
+      {
+        if (str[sa12[i]] != c0 || str[sa12[i] + 1] != c1 || str[sa12[i] + 2] != c2)
+        {
+          name++;
+          c0 = str[sa12[i]];
+          c1 = str[sa12[i] + 1];
+          c2 = str[sa12[i] + 2];
         }
-        // Recursively sort if not, generate array if it is
-        if (name < n02) {
-            build(s12, &sa12, n02, name);
-            for (size_t i = 0; i < n02; i++) {
-                s12[sa12[i]] = i + 1;
-            }
-        } else {
-            for (size_t i = 0; i < n02; i++) {
-                sa12[s12[i] - 1] = i;
-            }
+        if (sa12[i] % 3 == 1)
+        {
+          s12[sa12[i] / 3] = name;
         }
+        else
+        {
+          s12[sa12[i] / 3 + n0] = name;
+        }
+      }
 
-        // Sorting lone third
-        for (size_t i = 0, j = 0; i < n02; i++) {
-            if (sa12[i] < n0) {
-                s0[j++] = 3 * sa12[i];
-            }
+      // Recursively sort if not, generate array if it is
+      if (name < n02)
+      {
+        build(s12, &sa12, n02, name);
+        for (size_t i = 0; i < n02; i++)
+        {
+          s12[sa12[i]] = i + 1;
         }
-        radixPass(s0, &sa0, str, 0, n0, letters);
-        // Merge
-        for (size_t p = 0, t = delta, k = 0; k < n; k++) {
-            size_t i = sa12[t] < n0 ? sa12[t] * 3 + 1 : (sa12[t] - n0) * 3 + 2;
-            size_t j = sa0[p];
-            if (sa12[t] < n0 ?
-                    leq(str[i], s12[sa12[t] + n0], str[j], s12[j / 3]) :
-                    leq(str[i], str[i + 1], s12[sa12[t] - n0 + 1],
-                            str[j], str[j + 1], s12[j / 3 + n0])) {
-                (*sap)[k] = i;
-                if (++t == n02) {
-                    for (k++; p < n0; p++, k++) {
-                        (*sap)[k] = sa0[p];
-                    }
-                }
-            } else {
-                (*sap)[k] = j;
-                if (++p == n0) {
-                    for (k++; t < n02; t++, k++) {
-                        (*sap)[k] = sa12[t] < n0 ? sa12[t] * 3 + 1 : (sa12[t] - n0) * 3 + 2;
-                    }
-                }
-            }
+      } 
+      else
+      {
+        for (size_t i = 0; i < n02; i++)
+        {
+          sa12[s12[i] - 1] = i;
         }
+      }
+
+      // Sorting lone third
+      for (size_t i = 0, j = 0; i < n02; i++)
+      {
+        if (sa12[i] < n0)
+        {
+          s0[j++] = 3 * sa12[i];
+        }
+      }
+      radixPass(s0, &sa0, str, 0, n0, letters);
+
+      // Merge
+      for (size_t p = 0, t = delta, k = 0; k < n; k++) 
+      {
+        size_t i = sa12[t] < n0 ? sa12[t] * 3 + 1 : (sa12[t] - n0) * 3 + 2;
+        size_t j = sa0[p];
+        if (sa12[t] < n0 ?
+          leq(str[i], s12[sa12[t] + n0], str[j], s12[j / 3]) :
+          leq(str[i], str[i + 1], s12[sa12[t] - n0 + 1],
+          str[j], str[j + 1], s12[j / 3 + n0]))
+        {
+          (*sap)[k] = i;
+          if (++t == n02) 
+          {
+            for (k++; p < n0; p++, k++)
+            {
+              (*sap)[k] = sa0[p];
+            }
+          }
+        }
+        else
+        {
+          (*sap)[k] = j;
+          if (++p == n0)
+          {
+            for (k++; t < n02; t++, k++)
+            {
+              (*sap)[k] = sa12[t] < n0 ? sa12[t] * 3 + 1 : (sa12[t] - n0) * 3 + 2;
+            }
+          }
+        }
+      }
     }
 
     int leq(int a1, int a2, int b1, int b2) {
@@ -195,40 +183,38 @@ struct SuffixArray {
 
     vector<size_t> getLCP() {
         vector<size_t> lcp(length - 1, 0);
-        for (size_t i = 0; i < length - 1; i++)
-		{
-            size_t k = idx[i];
-			size_t j = idx[i+1];
-			size_t curr = 0;
-            while (k + curr < length && j + curr < length && str[k + curr] == str[j + curr])
-			{
-                curr++;
+        size_t curr = 0;
+        for (size_t i = 0; i < length; i++) {
+            size_t k = inv[i];
+            if (k < length - 1) {
+                int j = idx[k + 1];
+                while (i + curr < length && j + curr < length &&
+                        str[i + curr] == str[j + curr]) {
+                    curr++;
+                }
+                lcp[k] = curr;
             }
-			lcp[i] = curr;
+            if (curr > 0) {
+                curr--;
+            }
         }
         return lcp;
     }
-    
-    size_t queryLcp(size_t a, size_t b)
-    {
-        if(a == b) return length - a;
-        size_t x = inv[a], y = inv[b];
-        return rmq.query(min(x, y), max(x, y)-1);
-    }
 
-	int queryLcpFromSAPos(size_t a, size_t b)
-	{
-		return krmq.query(a, b-1);
-	}
+    int queryLcpFromSAPos(size_t a, size_t b)
+	  {
+		  return krmq_query(a, b-1);
+	  }
     
+    // Whether suffixes with indices a and b in sorted order have lcp >= k
     int queryLcpK(size_t a, size_t b)
     {
-        if(a == b) return (length - a) >= krmq.k;
-        size_t x = inv[a], y = inv[b];
-        return krmq.query(min(x, y), max(x, y)-1);
+        if(a == b) return (length - idx[a]) >= krmqk;
+        size_t x = a, y = b;
+        return krmq_query(min(x, y), max(x, y)-1);
     }
     
-    SuffixArray(vector<size_t> st, size_t ln, int ltrs)
+    SuffixArray(vector<size_t> st, size_t ln, size_t ltrs)
     {
         length = ln;
         letters = ltrs;
@@ -240,13 +226,17 @@ struct SuffixArray {
             inv[idx[i]] = i;
         }
         lcp = getLCP();
-        //rmq = RMQ(lcp);
+cout <<"LCP" << endl;
+for(size_t i = 0; i<lcp.size(); i++) cout << i << ":" << lcp[i] << " ";
+cout << endl;
+        vector<size_t>().swap(str);
+        vector<size_t>().swap(idx);
     }
     
     SuffixArray(){}
 };
 
-SuffixArray sa_init2(string str, int letters)
+SuffixArray sa_init2(string str, size_t letters)
 {
     return SuffixArray(toIntVector(str), str.length(), letters + 1);
 }

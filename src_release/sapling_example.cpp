@@ -22,7 +22,9 @@ int main(int argc, char **argv)
     Sapling sap(argv[1]);
     
     cout << "Testing Sapling" << endl;
-    int numQueries = 5000000;
+
+    // Create queries as random kmers from the genome
+    int numQueries = 50000;
     vector<string> queries(numQueries, "");
     vector<long long> kmers = vector<long long>(numQueries, 0);
     for(int i = 0; i<numQueries; i++)
@@ -32,6 +34,7 @@ int main(int argc, char **argv)
     	kmers[i] = sap.kmerize(queries[i]);
     }
     
+    // Write the queries to a file
     FILE *outfile = fopen ("queries.out", "w");
     for(int i = 0; i < numQueries; i++)
     {
@@ -42,23 +45,24 @@ int main(int argc, char **argv)
         for(int j = 0; j<sap.k; j++) fprintf(outfile, "9");
         fprintf(outfile, "\n");
     }
-    
     cout << "Constructed queries" << endl;
+    
     // Run piece-wise linear test
-    vector<size_t> plAnswers(numQueries, 0);
+    vector<long long> plAnswers(numQueries, 0);
     for(int i = 0; i<numQueries; i++)
     {
-        plAnswers[i] = sap.plQuery(queries[i].substr(0, sapling->k), kmers[i], queries[i].length());
+        plAnswers[i] = sap.plQuery(queries[i].substr(0, sap.k), kmers[i], queries[i].length());
     }
     
     // Check the answers
     int countCorrect = 0;
     for(int i = 0; i<numQueries; i++)
     {
-        if(plAnswers[i] + sap.k <= sap.n && queries[i] == sap.reference.substr(plAnswers[i], sap.k))
+        if(plAnswers[i] == -1) continue;
+        if(plAnswers[i] + (long long)sap.k <= (long long)sap.n && queries[i] == sap.reference.substr(plAnswers[i], sap.k))
         {
             countCorrect++;
         }
     }
-    cout <<"Piecewise linear correctness: " << countCorrect << " out of " << numQueries << endl;
+    cout << "Piecewise linear correctness: " << countCorrect << " out of " << numQueries << endl;
 }
