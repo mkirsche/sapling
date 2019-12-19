@@ -19,7 +19,7 @@ struct Sapling {
 
     string reference;
     int alpha = 2;
-    int k = 17;
+    int k = 21;
     int buckets = 18;
     double mostThreshold = 0.95;
     vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
