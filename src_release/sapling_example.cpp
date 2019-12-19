@@ -2,6 +2,7 @@
  * An example of how to build and query Sapling.
  */
 
+#include <chrono>
 #include <stdio.h>
 #include <fstream>
 #include <iostream>
@@ -10,6 +11,8 @@
 #include <algorithm>
 #include <string>
 #include "sapling_api.h"
+
+using namespace std::chrono;
 
 int main(int argc, char **argv)
 {
@@ -49,11 +52,15 @@ int main(int argc, char **argv)
     
     // Run piece-wise linear test
     vector<long long> plAnswers(numQueries, 0);
+    auto start = std::chrono::system_clock::now();
     for(int i = 0; i<numQueries; i++)
     {
         plAnswers[i] = sap.plQuery(queries[i].substr(0, sap.k), kmers[i], queries[i].length());
     }
-    
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    cout << "Piecewise linear time: " << elapsed_seconds.count() << endl;
+
     // Check the answers
     int countCorrect = 0;
     for(int i = 0; i<numQueries; i++)

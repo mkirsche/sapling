@@ -238,7 +238,8 @@ struct Sapling {
       maxUnder = max((int)unders[i], maxUnder);
       tot += abs(unders[i]);
     }
-    if(maxUnder < 2) maxUnder = 2;  if(maxOver < 2) maxOver = 2;
+    if(maxUnder < 2) maxUnder = 2;  
+    if(maxOver < 2) maxOver = 2;
     cout << "All overestimates within: " << maxOver << endl;
     cout << "All underestimates within: " << maxUnder << endl;
     cout << "Prefect predictions: " << perfectPredictions << endl;
@@ -249,7 +250,8 @@ struct Sapling {
     mostOver = mostUnder = 0;
     if(overs.size() > 0) mostOver = overs[(size_t)(mostThreshold * overs.size())];
     if(unders.size() > 0) mostUnder = unders[(size_t)(mostThreshold * unders.size())];
-    if(mostOver < 1) mostOver = 1; if(mostUnder < 1) mostUnder = 1;
+    if(mostOver < 1) mostOver = 1;
+    if(mostUnder < 1) mostUnder = 1;
     cout << mostThreshold << " of overestimates within: " << mostOver << endl;
     cout << mostThreshold << " of underestimates within: " << mostUnder << endl;
   }
@@ -378,7 +380,8 @@ struct Sapling {
         {
           chrEnds[curName] = charCount;
         }
-        curName = cur.substr(1);
+        auto first_token = cur.substr(0, cur.find(' '));
+        curName = first_token.substr(1);
       }
     }
     if(curName.length() > 0)
@@ -407,7 +410,7 @@ struct Sapling {
       err = fread(&size, sizeof(size_t), 1, infile);
       lcp.resize(size);
       err = fread(&lcp[0], sizeof(size_t), size, infile);
-      if(err != size)
+      if(err == 0)
       {
         cerr << "Error reading suffix array from file" << endl;
       }
@@ -438,17 +441,12 @@ struct Sapling {
       cout << "Built suffix array of size " << sa.size() << endl;
     }
 
-    //vector<size_t>().swap(lsa.lcp);
+    vector<size_t>().swap(lsa.lcp);
     
     cout << "Initializing rev and sa" << endl;
     rev = vector<size_t>(n, 0);
     cout << "Filling rev and sa" << endl;
     for(size_t i = 0; i<n; i++) rev[sa[i]] = i;
-
-    for(size_t i = 0; i<n; i++)
-    {
-      size_t stringIndex = rev[i];
-    }
     
     const char *saplingfn = saplingfnString.c_str();
     ifstream saplingf(saplingfn);

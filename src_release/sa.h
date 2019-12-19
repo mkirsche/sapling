@@ -24,7 +24,7 @@ struct SuffixArray {
     vector<size_t> inv;
     vector<size_t> lcp;
     
-    size_t krmqk;
+    size_t krmqk = 0;
     vector<size_t> krmqb;
 
     // Say for each position in the lcp array, where the next lcp value < k starting there
