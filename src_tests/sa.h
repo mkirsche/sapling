@@ -74,9 +74,9 @@ struct KRMQ
 vector<size_t> toIntVector(string str) {
     vector<size_t> res(str.length() + 3, 0);
     for (size_t i = 0; i < str.length(); i++) {
-        res[i] = str[i] - 'A' + 1;
+        res[i] = (size_t)(str[i] - 'A' + 1);
     }
-    res[str.length()] = res[str.length()+1] = res[str.length()+2] = 0;
+    res[str.length()] = res[str.length()+1] = res[str.length()+2] = (size_t)0;
     return res;
 }
  
@@ -97,7 +97,7 @@ struct SuffixArray {
 	vector<size_t> cnt(letters+1, 0);
         for(int i = 0; i<letters+1; i++) cnt[i] = 0;
         for (size_t i = 0; i < n; i++) {
-            cnt[ref[a[i] + offset]]++;
+            cnt[(size_t)(ref[a[i] + offset])]++;
         }
         for (size_t i = 0, sum = 0; i <= letters; i++) {
             size_t t = cnt[i];
@@ -105,7 +105,7 @@ struct SuffixArray {
             sum += t;
         }
         for (size_t i = 0; i < n; i++) {
-            (*b)[cnt[ref[a[i] + offset]]++] = a[i];
+            (*b)[cnt[(size_t)(ref[a[i] + offset])]++] = a[i];
         }
     }
 
@@ -247,7 +247,8 @@ struct SuffixArray {
             inv[idx[i]] = i;
         }
         lcp = getLCP();
-        //rmq = RMQ(lcp);
+        vector<size_t>().swap(str);
+        vector<size_t>().swap(idx);
     }
     
     SuffixArray(){}

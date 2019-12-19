@@ -22,7 +22,7 @@ int k = 21;
 int buckets = 15; // TODO handle cases when some buckets are empty
 double mostThreshold = 0.95;
 vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
-vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
+vector<size_t> rev;
 size_t n;
 vector<long long> errors;
 vector<int> overs, unders;
@@ -201,11 +201,17 @@ void errorStats()
 	maxOver = 0;
 	long tot = 0;
 	size_t n = overs.size() + unders.size();
-	for(size_t i = 0; i<n; i++)
+	for(size_t i = 0; i<overs.size(); i++)
 	{
-		maxUnder = max((int)(-1) * (int)errors[i], maxUnder);
-		maxOver = max((int)errors[i], maxOver);
-		tot += abs(errors[i]);
+    //cout << "over: " << overs[i] << endl;
+		maxOver = max((int)overs[i], maxOver);
+		tot += abs(overs[i]);
+	}
+  for(size_t i = 0; i<unders.size(); i++)
+	{
+    //cout << "under: " << unders[i] << endl;
+		maxUnder = max((int)unders[i], maxUnder);
+		tot += abs(unders[i]);
 	}
 	cout << "All overestimates within: " << maxOver << endl;
 	cout << "All underestimates within: " << maxUnder << endl;
@@ -265,7 +271,7 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
 	        ylist[i] = ylist[i-1];
 	    }
 	}
-	errors.resize(xs.size());
+	//errors.resize(xs.size());
 	overs.resize(0);
 	unders.resize(0);
   printf("(%ld, %ld) to (%ld, %ld)\n", xlist[0], ylist[0], xlist[1], ylist[1]);
@@ -276,11 +282,11 @@ void buildPiecewiseLinear(string& s, vector<size_t> sa)
 		size_t predict = queryPiecewiseLinear(xs[i]);
 		size_t y = ys[i];
 
-		errors[i] = getError(y, predict);
-		if(errors[i] > 0) overs.push_back(errors[i]);
-		else unders.push_back(-errors[i]);
+		int curError = getError(y, predict);
+		if(curError > 0) overs.push_back(curError);
+		else unders.push_back(-curError);
 
-    fprintf(tmpFout3, "%ld %ld %ld %ld\n", xs[i], ys[i], predict, errors[i]);
+    fprintf(tmpFout3, "%ld %ld %ld %ld\n", xs[i], ys[i], predict, curError);
     
     if(xs[i] > xlist[1] && xs[i] < xlist[(1L<<buckets)+1-2])
     {
@@ -381,8 +387,7 @@ int main(int argc, char **argv)
         lsa.krmq = KRMQ(lsa.lcp, k);
         cout << "Built suffix array of size " << sa.size() << endl;
     }
-    std::vector<size_t> newlcp;
-    newlcp.swap(lsa.lcp);
+    vector<size_t>().swap(lsa.lcp);
     
     cout << "Initializing rev and sa" << endl;
     rev = vector<size_t>(n, 0);
