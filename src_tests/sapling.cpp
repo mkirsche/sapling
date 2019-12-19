@@ -225,7 +225,7 @@ void errorStats()
 	cout << mostThreshold << " of underestimates within: " << mostUnder << endl;
 }
 
-void buildPiecewiseLinear(string& s, vector<size_t> sa)
+void buildPiecewiseLinear(string& s)
 {
 	vector<long long> xs;
 	vector<size_t> ys;
@@ -344,8 +344,6 @@ int main(int argc, char **argv)
     n = reference.length();
     cout << n << endl;
     
-    vector<size_t> sa;
-    
     string fnString = argv[2];
     const char *fn = fnString.c_str();
     ifstream f(fn);
@@ -425,7 +423,7 @@ int main(int argc, char **argv)
     else
     {
         cout << "Building Sapling" << endl;
-        buildPiecewiseLinear(reference, sa);
+        buildPiecewiseLinear(reference);
         cout << "Writing Sapling to file" << endl;
         FILE *outfile = fopen (saplingfn, "wb");
         size_t xlistsize = (1L<<buckets)+1;
