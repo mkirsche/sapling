@@ -45,7 +45,13 @@ struct SuffixArray {
     int krmq_query(size_t i, size_t j)
     {
         //cout << i << " " << j << " " << krmqb[i] << endl;
-        return (i == j) || (krmqb[i] > j);
+        return (i > j) || (krmqb[i] > j);
+    }
+
+    // Whether suffixes with indices a and b in sorted order have lcp >= k
+    int queryLcpK(size_t a, size_t b)
+    {
+        return krmq_query(min(a, b), max(a, b)-1);
     }
 
     size_t length = 0;
@@ -206,14 +212,6 @@ struct SuffixArray {
 		  return krmq_query(a, b-1);
 	  }
     
-    // Whether suffixes with indices a and b in sorted order have lcp >= k
-    int queryLcpK(size_t a, size_t b)
-    {
-        if(a == b) return (length - idx[a]) >= krmqk;
-        size_t x = a, y = b;
-        return krmq_query(min(x, y), max(x, y)-1);
-    }
-    
     SuffixArray(vector<size_t> st, size_t ln, size_t ltrs)
     {
         length = ln;
@@ -226,9 +224,6 @@ struct SuffixArray {
             inv[idx[i]] = i;
         }
         lcp = getLCP();
-cout <<"LCP" << endl;
-for(size_t i = 0; i<lcp.size(); i++) cout << i << ":" << lcp[i] << " ";
-cout << endl;
         vector<size_t>().swap(str);
         vector<size_t>().swap(idx);
     }

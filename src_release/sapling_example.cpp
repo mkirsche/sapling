@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     cout << "Testing Sapling" << endl;
 
     // Create queries as random kmers from the genome
-    int numQueries = 50000;
+    int numQueries = 5000000;
     vector<string> queries(numQueries, "");
     vector<long long> kmers = vector<long long>(numQueries, 0);
     for(int i = 0; i<numQueries; i++)

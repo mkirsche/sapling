@@ -190,18 +190,31 @@ struct Sapling {
   // We can adjust the true value as long as the starting kmer is the same
   int getError(size_t y, size_t predict)
   {
-      size_t oldy = y;
       if(y < predict)
       {
         // Try increasing y to be closer to prediction
-        while(y < predict && lsa.lcp[y] > k) y++;
-        return (int)y - (int)predict;
+        long long lo = y, hi = (long long)predict + 1;
+        while(lo < hi - 1)
+        {
+          size_t mid = (size_t)((lo + hi) / 2);
+          if(lsa.queryLcpK(y, mid)) lo = (long long)mid;
+          else hi = (long long)mid;
+        }
+        y = (size_t)lo;
+        return (int)((long long)y - (long long)predict);
       }
       else if(y == predict) return 0;
       else 
       {
-        while(y > predict && lsa.lcp[y-1] > k) y--;
-        return (int)y - (int)predict;
+        long long lo = (long long)predict - 1, hi = y;
+        //while(y > predict && lsa.lcp[y-1] > k) y--;
+        while(lo < hi - 1)
+        {
+          size_t mid = (size_t)((lo + hi) / 2);
+          if(lsa.queryLcpK(mid, y)) hi = (long long)mid;
+          else lo = (long long)mid;
+        }
+        return (int)((long long)y - (long long)predict);
       }
     }
 
@@ -329,7 +342,6 @@ struct Sapling {
 
     // Compute maximum/average/etc. errors
     errorStats();
-cout << "done" << endl;
   }
   
   Sapling(string refFnString)
