@@ -25,45 +25,45 @@ static inline uint32_t cigar_int_to_len (uint32_t cigar_int) {
 	return cigar_int >> BAM_CIGAR_SHIFT;
 }
 
-static void write_sam_alignment(StripedSmithWaterman::Alignment* a, string read_name, string read_qual, string read_seq, string ref_name, int strand, int aligned)
+static void write_sam_alignment(StripedSmithWaterman::Alignment* a, string read_name, string read_qual, string read_seq, string ref_name, int strand, int aligned, FILE *fout)
 {
-  fprintf(stdout, "%s\t", read_name.c_str());
-	if (!aligned) fprintf(stdout, "4\t*\t0\t255\t*\t*\t0\t0\t*\t*\n");
+  fprintf(fout, "%s\t", read_name.c_str());
+	if (!aligned) fprintf(fout, "4\t*\t0\t255\t*\t*\t0\t0\t*\t*\n");
 	else
   {
     int32_t c, p;
     uint32_t mapq = -4.343 * log(1 - (double)abs(a->sw_score - a->sw_score_next_best)/(double)a->sw_score);
     mapq = (uint32_t) (mapq + 4.99);
     mapq = mapq < 254 ? mapq : 254;
-    if (strand) fprintf(stdout, "16\t");
-    else fprintf(stdout, "0\t");
-    fprintf(stdout, "%s\t%d\t%d\t", ref_name.c_str(), a->ref_begin + 1, mapq);
+    if (strand) fprintf(fout, "16\t");
+    else fprintf(fout, "0\t");
+    fprintf(fout, "%s\t%d\t%d\t", ref_name.c_str(), a->ref_begin + 1, mapq);
     for (c = 0; c < (int)(a->cigar.size()); ++c)
     {
 	    char letter = cigar_int_to_op(a->cigar[c]);
 	    uint32_t length = cigar_int_to_len(a->cigar[c]);
-	    fprintf(stdout, "%lu%c", (unsigned long)length, letter);
+	    fprintf(fout, "%lu%c", (unsigned long)length, letter);
     }
-		fprintf(stdout, "\t*\t0\t0\t");
-		fprintf(stdout, "%s", read_seq.c_str());
-		fprintf(stdout, "\t");
+		fprintf(fout, "\t*\t0\t0\t");
+		fprintf(fout, "%s", read_seq.c_str());
+		fprintf(fout, "\t");
 
     if (read_qual.length() > 0 && strand)
     {
-	    for (p = read_qual.length() - 1; p >= 0; --p) fprintf(stdout, "%c", read_qual[p]);
+	    for (p = read_qual.length() - 1; p >= 0; --p) fprintf(fout, "%c", read_qual[p]);
     }
     else if (read_qual.length() > 0)
     {
-      fprintf (stdout, "%s", read_qual.c_str());
+      fprintf (fout, "%s", read_qual.c_str());
     }
     else
     {
-      fprintf(stdout, "*");
+      fprintf(fout, "*");
     }
-    fprintf(stdout, "\tAS:i:%d", a->sw_score);
-    fprintf(stdout,"\tNM:i:%d\t", a->mismatches);
-    if (a->sw_score_next_best > 0) fprintf(stdout, "ZS:i:%d\n", a->sw_score_next_best);
-    else fprintf(stdout, "\n");
+    fprintf(fout, "\tAS:i:%d", a->sw_score);
+    fprintf(fout,"\tNM:i:%d\t", a->mismatches);
+    if (a->sw_score_next_best > 0) fprintf(fout, "ZS:i:%d\n", a->sw_score_next_best);
+    else fprintf(fout, "\n");
   }
 }
 
@@ -86,7 +86,8 @@ class SaplingAligner
         // Basic constructor which initializes everything
         SaplingAligner(char* queryFn, char* refFn)
         {
-            sapling = new Sapling(refFn);
+            string refString = string(refFn);
+            sapling = new Sapling(refString, refString + ".sa", refString + ".sap", -1);
             aln = new StripedSmithWaterman::Aligner();
             queryReader = new std::ifstream(queryFn);
         }
@@ -112,21 +113,24 @@ class SaplingAligner
         }
 
         // Run the alignment of all reads in the input file
-        void align_all_reads()
+        void align_all_reads(char *outFn)
         {
+            cout << "Aligning reads" << endl;
+            FILE *fout = fopen(outFn, "w");
             while(1) 
             {
-                string cur = align_next_read();
+                string cur = align_next_read(fout);
                 if(cur.length() == 0)
                 {
                     return;
                 }
                 //cout << cur << endl;
             }
+            fclose(fout);
         }
 
         // Align the next read in the stream and return an alignment record
-        string align_next_read()
+        string align_next_read(FILE *fout)
         {
             vector<string> cur_read = get_read();
             if(cur_read.size() < 3)
@@ -136,12 +140,12 @@ class SaplingAligner
             string seq = cur_read[1];
             string name = cur_read[0].substr(1);
             string qual = cur_read[2];
-            return seed_extend(seq, name, qual);
+            return seed_extend(seq, name, qual, fout);
         }
 
-        string seed_extend(string seq, string name, string qual)
+        string seed_extend(string seq, string name, string qual, FILE *fout)
         {
-            size_t num_seeds = 3;
+            size_t num_seeds = 7;
             size_t last = seq.length() - sapling->k;
             vector<tuple<size_t, size_t, size_t, size_t, size_t>> counts;
             for(size_t i = 0; i < num_seeds; i++)
@@ -165,26 +169,17 @@ class SaplingAligner
                     size_t sa_pos = sapling->sa[ref_pos];
                     int left = sapling->countHitsLeft(sapling->sa[ref_pos]);
                     int right = sapling->countHitsRight(sapling->sa[ref_pos]);
-                    if(right + left > (int)sapling->MAX_HITS) right = left + sapling->MAX_HITS;
-                    left = min(left, (int)(sapling->MAX_HITS/2));
-                    right = min(right, (int)(sapling->MAX_HITS/2));
-                    if((size_t)(left + right) < sapling->MAX_HITS)
-                    {
-                        counts.push_back(
-                            make_tuple(
-                                (size_t)(left + right + 1),
-                                cur_pos,
-                                sa_pos,
-                                left,
-                                right)
-                        );
-                        for(int offset = -left; offset<=right; offset++)
-                        {
-                            //size_t real_pos = sapling->rev[sa_pos + offset];
-                            //cout << "Match of seed " << i << " at " << real_pos << endl;
-                            //cout << sapling->reference.substr(real_pos, sapling->k) << endl;
-                        }
-                    }
+                    
+                    //left = min(left, (int)(sapling->MAX_HITS/2));
+                    //right = min(right, (int)(sapling->MAX_HITS/2));
+                    counts.push_back(
+                      make_tuple(
+                        (size_t)(left + right + 1),
+                        cur_pos,
+                        sa_pos,
+                        left,
+                        right)
+                      );
                 }
                 else
                 {
@@ -202,7 +197,18 @@ class SaplingAligner
                 size_t sa_pos = get<2>(counts[i]);
                 int left = get<3>(counts[i]); 
                 int right = get<4>(counts[i]);
-
+                if((size_t)(left + right) > sapling->MAX_HITS)
+                {
+                  if(best_score == -1)
+                  {
+                    left = min(left, (int)(sapling->MAX_HITS/2));
+                    right = min(right, (int)(sapling->MAX_HITS/2));
+                  }
+                  else
+                  {
+                    left = right = 0;
+                  }
+                }
 
                 for(int offset = -left; offset <= right; offset++)
                 {
@@ -247,11 +253,11 @@ class SaplingAligner
                   }
                 }
                 best_alignment.ref_begin -= lastEnd;
-                write_sam_alignment(&best_alignment, name, qual, seq, refName, 0, 1);
+                write_sam_alignment(&best_alignment, name, qual, seq, refName, 0, 1, fout);
             }
             else
             {
-              write_sam_alignment(&best_alignment, name, qual, seq, "refname", 0, 0);
+              write_sam_alignment(&best_alignment, name, qual, seq, "refname", 0, 0, fout);
             }
             return "success";
         }
@@ -268,20 +274,21 @@ class SaplingAligner
 // Error message for when the user provides the wrong parameters
 void usage()
 {
-    printf("usage: ./align <query> <ref>\n");
+    printf("usage: ./align <query> <ref> <outfile>\n");
 }
 
 int main(int argc, char** argv)
 {
-    if(argc != 3)
+    if(argc != 4)
     {
         usage();
         return 1;
     }
     char* queryFn = argv[1];
     char* refFn = argv[2];
+    char* outFn = argv[3];
     SaplingAligner* sa = new SaplingAligner(queryFn, refFn);
-    sa->align_all_reads();
+    sa->align_all_reads(outFn);
     delete sa;
     return 0;
 }
