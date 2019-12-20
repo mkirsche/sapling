@@ -1,2 +1,4 @@
 align
 *.o
+*.sam
+
