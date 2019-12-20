@@ -259,8 +259,11 @@ struct Sapling {
   void buildPiecewiseLinear(string& s)
   {
     // Compute the maximum number of buckets < 5% of genome
-    buckets = 1;
-    while((size_t)(1L<<buckets) * 40 <= s.length()) buckets++;
+    if(buckets == -1)
+    {
+      buckets = 1;
+      while((size_t)(1L<<buckets) * 40 <= s.length()) buckets++;
+    }
     printf("Buckets (log): %d\n", buckets);
 
     // Get hash of first kmer
@@ -346,13 +349,15 @@ struct Sapling {
     errorStats();
   }
   
-  Sapling(string refFnString)
+  Sapling(string refFnString, string saFnString, string saplingFnString, int numBuckets)
   {
     for(int i = 0; i<256; i++) vals[i] = 0;
     vals['A'] = 0;
     vals['C'] = 1;
     vals['G'] = 2;
     vals['T'] = 3;
+
+    //buckets = numBuckets;
       
     ifstream input(refFnString);
     string cur;
@@ -390,12 +395,12 @@ struct Sapling {
     }
     reference = out.str();
       
-    string fnString = refFnString + ".sa";
-    string saplingfnString = refFnString + ".sap";
+    //string fnString = refFnString + ".sa";
+    //string saplingfnString = refFnString + ".sap";
     
     n = reference.length();
 
-    const char *fn = fnString.c_str();
+    const char *fn = saFnString.c_str();
     ifstream f(fn);
     if(f.good())
     {
@@ -448,7 +453,7 @@ struct Sapling {
     cout << "Filling rev and sa" << endl;
     for(size_t i = 0; i<n; i++) rev[sa[i]] = i;
     
-    const char *saplingfn = saplingfnString.c_str();
+    const char *saplingfn = saplingFnString.c_str();
     ifstream saplingf(saplingfn);
     if(saplingf.good())
     {

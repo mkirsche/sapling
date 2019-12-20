@@ -16,13 +16,29 @@ using namespace std::chrono;
 
 int main(int argc, char **argv)
 {
-    if(argc != 2)
+    if(argc < 2)
     {
-        cout << "Usage: " << argv[0] << " <genome file> " << endl;
+        cout << "Usage: " << argv[0] << " <genome file> [<suffix array file> <sapling file>] " << endl;
         return 0;
     }
 
-    Sapling sap(argv[1]);
+    string refFnString = argv[1];
+    string saFnString = refFnString + ".sa";
+    string saplingFnString = refFnString + ".sap";
+    int numBuckets = -1;
+
+    if(argc >= 4)
+    {
+      saFnString = argv[2];
+      saplingFnString = argv[3];
+    }
+
+    if(argc >= 5)
+    {
+      numBuckets = atoi(argv[4]);
+    }
+
+    Sapling sap(refFnString, saFnString, saplingFnString, numBuckets);
     
     cout << "Testing Sapling" << endl;
 
