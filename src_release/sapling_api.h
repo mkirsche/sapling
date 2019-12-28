@@ -39,6 +39,9 @@ struct Sapling {
 
     SuffixArray lsa;
     
+    /*
+     * Hashes the first k characters of a string into a 2k-bit integer
+     */
     long long kmerize(const string& s)
     {
       long long kmer = 0;
@@ -46,7 +49,10 @@ struct Sapling {
       return kmer;
     }
     
-    // Evaluates the piecewise linear for a given binary-encoded kmer
+    /*
+     * Queries the piecewise linear index for a given kmer value.
+     * Returns the predicted suffix array position
+     */
     size_t queryPiecewiseLinear(long long x)
     {
       size_t bucket = (x >> (alpha*k - buckets));
@@ -59,13 +65,28 @@ struct Sapling {
       return (size_t)predict;
     }
     
+    /*
+     * Gets the lcp of a query string s with a given length 
+     * and the reference starting at a particular position
+     */
     size_t getLcp(size_t idx, string& s, int start, int length)
     {
       int i = start;
       for(; i<length && idx+i < n; i++) if(s[i] != reference[idx+i]) return i;
       return i; // whole thing matches
     }
-    
+  
+    /*
+     * Performs binary search in a section of the suffix array for suffixes starting with a given string
+     *
+     * s is the string being queried
+     * lo is the start of the range
+     * hi is the end of the range
+     * loLcp is the LCP of s with the suffix at position lo
+     * hiLcp is the LCP of s with the suffix at position hi
+     * length is the number of characters in s
+     * Returns a suffix array index such that the suffix there matches s if s occurs in the reference.
+     */  
     long long binarySearch(string &s, size_t lo, size_t hi, size_t loLcp, size_t hiLcp, int length)
     {
       // Base case
@@ -88,6 +109,10 @@ struct Sapling {
       }
     }
     
+    /*
+     * Queries sapling for a given string s given its kmer value
+     * The piecewise linear function is evaluated, and then a binary search is performed around the result
+     */
     long long plQuery(string s, long kmer, size_t length)
     {
       //cout << s << endl;
@@ -156,6 +181,11 @@ struct Sapling {
     }
 
   size_t MAX_HITS = 32;
+
+  /*
+   * Counts the number of suffixes to the right of a position which have at least k characters in common with it
+   * Used for getting all seeds for alignment
+   */
   size_t countHitsRight(int sa_pos)
   {
     int lo = sa_pos, hi = sa_pos + MAX_HITS;
@@ -171,6 +201,10 @@ struct Sapling {
     return lo - sa_pos;
    }
 
+  /*
+   * Counts the number of suffixes to the left of a position which have at least k characters in common with it
+   * Used for getting all seeds for alignment
+   */
   size_t countHitsLeft(int sa_pos)
   {
     int  lo = sa_pos - MAX_HITS, hi = sa_pos;
@@ -186,38 +220,42 @@ struct Sapling {
     return sa_pos - hi;
   }
   
-  // Gets the error for true suffix array position y and predicted position predict
-  // We can adjust the true value as long as the starting kmer is the same
+  /*
+   * Calculates the prediction error given the prediction and true suffix array position
+   * The true position can shift closer to the prediction when there are many occurrences of the same kmer
+   */
   int getError(size_t y, size_t predict)
   {
-      if(y < predict)
+    if(y < predict)
+    {
+      // Try increasing y to be closer to prediction
+      long long lo = y, hi = (long long)predict + 1;
+      while(lo < hi - 1)
       {
-        // Try increasing y to be closer to prediction
-        long long lo = y, hi = (long long)predict + 1;
-        while(lo < hi - 1)
-        {
-          size_t mid = (size_t)((lo + hi) / 2);
-          if(lsa.queryLcpK(y, mid)) lo = (long long)mid;
-          else hi = (long long)mid;
-        }
-        y = (size_t)lo;
-        return (int)((long long)y - (long long)predict);
+        size_t mid = (size_t)((lo + hi) / 2);
+        if(lsa.queryLcpK(y, mid)) lo = (long long)mid;
+        else hi = (long long)mid;
       }
-      else if(y == predict) return 0;
-      else 
-      {
-        long long lo = (long long)predict - 1, hi = y;
-        //while(y > predict && lsa.lcp[y-1] > k) y--;
-        while(lo < hi - 1)
-        {
-          size_t mid = (size_t)((lo + hi) / 2);
-          if(lsa.queryLcpK(mid, y)) hi = (long long)mid;
-          else lo = (long long)mid;
-        }
-        return (int)((long long)y - (long long)predict);
-      }
+      y = (size_t)lo;
+      return (int)((long long)y - (long long)predict);
     }
+    else if(y == predict) return 0;
+    else 
+    {
+      long long lo = (long long)predict - 1, hi = y;
+      while(lo < hi - 1)
+      {
+        size_t mid = (size_t)((lo + hi) / 2);
+        if(lsa.queryLcpK(mid, y)) hi = (long long)mid;
+        else lo = (long long)mid;
+      }
+      return (int)((long long)y - (long long)predict);
+    }
+  }
 
+  /*
+   * Calculates statistics about the prediction errors, such as the max and 95th percentile in each direction
+   */
   void errorStats()
   {
     cout << "Computing error stats" << endl;
@@ -256,6 +294,9 @@ struct Sapling {
     cout << mostThreshold << " of underestimates within: " << mostUnder << endl;
   }
 
+  /*
+   * Builds the piecewise linear index for a given string and suffix array
+   */
   void buildPiecewiseLinear(string& s)
   {
     // Compute the maximum number of buckets < 5% of genome
@@ -349,6 +390,9 @@ struct Sapling {
     errorStats();
   }
   
+  /*
+   * Takes a FASTA filepath and builds Sapling from the contained genome
+   */
   Sapling(string refFnString, string saFnString, string saplingFnString, int numBuckets)
   {
     for(int i = 0; i<256; i++) vals[i] = 0;
@@ -357,7 +401,7 @@ struct Sapling {
     vals['G'] = 2;
     vals['T'] = 3;
 
-    //buckets = numBuckets;
+    buckets = numBuckets;
       
     ifstream input(refFnString);
     string cur;
@@ -395,9 +439,6 @@ struct Sapling {
     }
     reference = out.str();
       
-    //string fnString = refFnString + ".sa";
-    //string saplingfnString = refFnString + ".sap";
-    
     n = reference.length();
 
     const char *fn = saFnString.c_str();
