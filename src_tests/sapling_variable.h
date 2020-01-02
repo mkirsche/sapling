@@ -316,10 +316,10 @@ struct Sapling {
             sa.resize(size);
             fread(&sa[0], sizeof(size_t), size, infile);
             
-            vector<size_t> lcp;
+            vector<int> lcp;
             fread(&size, sizeof(size_t), 1, infile);
             lcp.resize(size);
-            fread(&lcp[0], sizeof(size_t), size, infile);
+            fread(&lcp[0], sizeof(int), size, infile);
             lsa = SuffixArray();
             
             cout << "Constructing RMQ" << endl;
@@ -346,6 +346,8 @@ struct Sapling {
             lsa.krmq = KRMQ(lsa.lcp, k);
             cout << "Built suffix array of size " << sa.size() << endl;
         }
+
+        vector<size_t>().swap(lsa.lcp);
         
         cout << "Initializing rev and sa" << endl;
         rev = vector<size_t>(n, 0);
