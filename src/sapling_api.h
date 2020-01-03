@@ -30,6 +30,8 @@ struct Sapling {
     int mostOver, mostUnder;
     size_t perfectPredictions = 0;
 
+    string errorsFn = "";
+
     map<string, int> chrEnds; // Map from chromosome to last position in genome which is part of that chromosome (zero-indexed)
     
     int vals[256];
@@ -393,7 +395,7 @@ struct Sapling {
   /*
    * Takes a FASTA filepath and builds Sapling from the contained genome
    */
-  Sapling(string refFnString, string saFnString, string saplingFnString, int numBuckets)
+  Sapling(string refFnString, string saFnString, string saplingFnString, int numBuckets, int myK)
   {
     for(int i = 0; i<256; i++) vals[i] = 0;
     vals['A'] = 0;
@@ -402,6 +404,11 @@ struct Sapling {
     vals['T'] = 3;
 
     buckets = numBuckets;
+
+    if(myK != -1)
+    {
+      k = myK;
+    }
       
     ifstream input(refFnString);
     string cur;

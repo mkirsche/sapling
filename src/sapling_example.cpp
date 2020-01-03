@@ -14,20 +14,51 @@
 
 using namespace std::chrono;
 
+int numBuckets = -1;
+int k = -1;
+string saFnString = "", saplingFnString = "";
+
 int main(int argc, char **argv)
 {
     if(argc < 2)
     {
-        cout << "Usage: " << argv[0] << " <genome file> [<suffix array file> <sapling file>] " << endl;
+        cout << "Usage: " << argv[0] << " <genome file> [saFn=<suffix array file>] [sapFn=<sapling file>] [nb=<log number of buckets>] [k=<k>]" << endl;
         return 0;
     }
 
     string refFnString = argv[1];
-    string saFnString = refFnString + ".sa";
-    string saplingFnString = refFnString + ".sap";
-    int numBuckets = -1;
+    saFnString = refFnString + ".sa";
+    saplingFnString = refFnString + ".sap";
 
-    if(argc >= 4)
+    for(int i = 2; i<argc; i++)
+    {
+      string cur = argv[i];
+      size_t eqPos = cur.find("=");
+      if(eqPos != string::npos)
+      {
+        string arg = cur.substr(0, eqPos);
+        string val = cur.substr(eqPos + 1);
+        if(arg.compare("saFn") == 0)
+        {
+          saFnString = val;
+        }
+        if(arg.compare("sapFn") == 0)
+        {
+          saplingFnString = val;
+        }
+        if(arg.compare("nb") == 0)
+        {
+          numBuckets = stoi(val);
+        }
+        if(arg.compare("k") == 0)
+        {
+          k = stoi(val);
+        }
+        cout << arg << " " << val << endl;
+      }
+    }
+
+   /* if(argc >= 4)
     {
       saFnString = argv[2];
       saplingFnString = argv[3];
@@ -36,9 +67,9 @@ int main(int argc, char **argv)
     if(argc >= 5)
     {
       numBuckets = atoi(argv[4]);
-    }
+    }*/
 
-    Sapling sap(refFnString, saFnString, saplingFnString, numBuckets);
+    Sapling sap(refFnString, saFnString, saplingFnString, numBuckets, k);
     
     cout << "Testing Sapling" << endl;
 
