@@ -18,13 +18,14 @@ int numBuckets = -1;
 int maxMem = -1;
 int k = -1;
 int numQueries = 5000000;
+string errorFnString = "";
 string saFnString = "", saplingFnString = "";
 
 int main(int argc, char **argv)
 {
     if(argc < 2)
     {
-        cout << "Usage: " << argv[0] << " <genome file> [saFn=<suffix array file>] [sapFn=<sapling file>] [nb=<log number of buckets>] [maxMem=<max number of buckets will be (genome size)/val>] [k=<k>] [nq=<number of queries>]" << endl;
+        cout << "Usage: " << argv[0] << " <genome file> [saFn=<suffix array file>] [sapFn=<sapling file>] [nb=<log number of buckets>] [maxMem=<max number of buckets will be (genome size)/val>] [k=<k>] [nq=<number of queries>] [errFn=<errors file if outputting them>]" << endl;
         return 0;
     }
 
@@ -47,6 +48,10 @@ int main(int argc, char **argv)
         if(arg.compare("sapFn") == 0)
         {
           saplingFnString = val;
+        }
+        if(arg.compare("errFn") == 0)
+        {
+          errorFnString = val;
         }
         if(arg.compare("nb") == 0)
         {
@@ -79,7 +84,7 @@ int main(int argc, char **argv)
       numBuckets = atoi(argv[4]);
     }*/
 
-    Sapling sap(refFnString, saFnString, saplingFnString, numBuckets, maxMem, k);
+    Sapling sap(refFnString, saFnString, saplingFnString, numBuckets, maxMem, k, errorFnString);
     
     cout << "Testing Sapling" << endl;
 

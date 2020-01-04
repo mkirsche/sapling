@@ -266,16 +266,16 @@ struct Sapling {
     maxOver = 0;
     long tot = 0;
     size_t n = overs.size() + unders.size() + perfectPredictions;
-    errorFile = fopen("errors.txt", "w");
+    if(errorsFn.length() > 0) errorFile = fopen(errorsFn.c_str(), "w");
     for(size_t i = 0; i<overs.size(); i++)
     {
-      fprintf(errorFile, "%d\n", overs[i]);
+      if(errorsFn.length() > 0) fprintf(errorFile, "%d\n", overs[i]);
       maxOver = max((int)overs[i], maxOver);
       tot += abs(overs[i]);
     }
     for(size_t i = 0; i<unders.size(); i++)
     {
-      fprintf(errorFile, "%d\n", -unders[i]);
+      if(errorsFn.length() > 0) fprintf(errorFile, "%d\n", -unders[i]);
       maxUnder = max((int)unders[i], maxUnder);
       tot += abs(unders[i]);
     }
@@ -295,6 +295,7 @@ struct Sapling {
     if(mostUnder < 1) mostUnder = 1;
     cout << mostThreshold << " of overestimates within: " << mostOver << endl;
     cout << mostThreshold << " of underestimates within: " << mostUnder << endl;
+    if(errorsFn.length() > 0) fclose(errorFile);
   }
 
   /*
@@ -396,7 +397,7 @@ struct Sapling {
   /*
    * Takes a FASTA filepath and builds Sapling from the contained genome
    */
-  Sapling(string refFnString, string saFnString, string saplingFnString, int numBuckets, int myMaxMem, int myK)
+  Sapling(string refFnString, string saFnString, string saplingFnString, int numBuckets, int myMaxMem, int myK, string errorFn)
   {
     for(int i = 0; i<256; i++) vals[i] = 0;
     vals['A'] = 0;
@@ -405,6 +406,7 @@ struct Sapling {
     vals['T'] = 3;
 
     buckets = numBuckets;
+    errorsFn = errorFn;
 
     if(myK != -1)
     {
