@@ -15,14 +15,16 @@
 using namespace std::chrono;
 
 int numBuckets = -1;
+int maxMem = -1;
 int k = -1;
+int numQueries = 5000000;
 string saFnString = "", saplingFnString = "";
 
 int main(int argc, char **argv)
 {
     if(argc < 2)
     {
-        cout << "Usage: " << argv[0] << " <genome file> [saFn=<suffix array file>] [sapFn=<sapling file>] [nb=<log number of buckets>] [k=<k>]" << endl;
+        cout << "Usage: " << argv[0] << " <genome file> [saFn=<suffix array file>] [sapFn=<sapling file>] [nb=<log number of buckets>] [maxMem=<max number of buckets will be (genome size)/val>] [k=<k>] [nq=<number of queries>]" << endl;
         return 0;
     }
 
@@ -54,6 +56,14 @@ int main(int argc, char **argv)
         {
           k = stoi(val);
         }
+        if(arg.compare("nq") == 0)
+        {
+          numQueries = stoi(val);
+        }
+        if(arg.compare("maxMem") == 0)
+        {
+          maxMem = stoi(val);
+        }
         cout << arg << " " << val << endl;
       }
     }
@@ -69,12 +79,11 @@ int main(int argc, char **argv)
       numBuckets = atoi(argv[4]);
     }*/
 
-    Sapling sap(refFnString, saFnString, saplingFnString, numBuckets, k);
+    Sapling sap(refFnString, saFnString, saplingFnString, numBuckets, maxMem, k);
     
     cout << "Testing Sapling" << endl;
 
     // Create queries as random kmers from the genome
-    int numQueries = 5000000;
     vector<string> queries(numQueries, "");
     vector<long long> kmers = vector<long long>(numQueries, 0);
     for(int i = 0; i<numQueries; i++)

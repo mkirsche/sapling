@@ -21,6 +21,7 @@ struct Sapling {
     int alpha = 2;
     int k = 21;
     int buckets = 18;
+    int maxMem = -1;
     double mostThreshold = 0.95;
     vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
     vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
@@ -305,7 +306,7 @@ struct Sapling {
     if(buckets == -1)
     {
       buckets = 1;
-      while((size_t)(1L<<buckets) * 40 <= s.length()) buckets++;
+      while((size_t)(1L<<buckets) * maxMem * 2 <= s.length()) buckets++;
     }
     printf("Buckets (log): %d\n", buckets);
 
@@ -395,7 +396,7 @@ struct Sapling {
   /*
    * Takes a FASTA filepath and builds Sapling from the contained genome
    */
-  Sapling(string refFnString, string saFnString, string saplingFnString, int numBuckets, int myK)
+  Sapling(string refFnString, string saFnString, string saplingFnString, int numBuckets, int myMaxMem, int myK)
   {
     for(int i = 0; i<256; i++) vals[i] = 0;
     vals['A'] = 0;
@@ -408,6 +409,10 @@ struct Sapling {
     if(myK != -1)
     {
       k = myK;
+    }
+    if(myMaxMem != -1)
+    {
+      maxMem = myMaxMem;
     }
       
     ifstream input(refFnString);
