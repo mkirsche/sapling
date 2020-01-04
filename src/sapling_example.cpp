@@ -69,7 +69,6 @@ int main(int argc, char **argv)
         {
           maxMem = stoi(val);
         }
-        cout << arg << " " << val << endl;
       }
     }
 

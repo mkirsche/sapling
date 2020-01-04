@@ -266,16 +266,13 @@ struct Sapling {
     maxOver = 0;
     long tot = 0;
     size_t n = overs.size() + unders.size() + perfectPredictions;
-    if(errorsFn.length() > 0) errorFile = fopen(errorsFn.c_str(), "w");
     for(size_t i = 0; i<overs.size(); i++)
     {
-      if(errorsFn.length() > 0) fprintf(errorFile, "%d\n", overs[i]);
       maxOver = max((int)overs[i], maxOver);
       tot += abs(overs[i]);
     }
     for(size_t i = 0; i<unders.size(); i++)
     {
-      if(errorsFn.length() > 0) fprintf(errorFile, "%d\n", -unders[i]);
       maxUnder = max((int)unders[i], maxUnder);
       tot += abs(unders[i]);
     }
@@ -295,7 +292,6 @@ struct Sapling {
     if(mostUnder < 1) mostUnder = 1;
     cout << mostThreshold << " of overestimates within: " << mostOver << endl;
     cout << mostThreshold << " of underestimates within: " << mostUnder << endl;
-    if(errorsFn.length() > 0) fclose(errorFile);
   }
 
   /*
@@ -310,6 +306,13 @@ struct Sapling {
       while((size_t)(1L<<buckets) * maxMem * 2 <= s.length()) buckets++;
     }
     printf("Buckets (log): %d\n", buckets);
+
+    // Initialize errors file and print number of buckets
+    if(errorsFn.length() > 0)
+    {
+      errorFile = fopen(errorsFn.c_str(), "w");
+      fprintf(errorFile, "%d\n", buckets);
+    }
 
     // Get hash of first kmer
     long long hash = kmerize(s.substr(0, k));
@@ -381,6 +384,8 @@ struct Sapling {
       size_t y = sa[i];
       int val = getError(y, predict);
 
+      if(errorsFn.length() > 0) fprintf(errorFile, "%d %d %d %d\n", hash, y, predict, val);
+
       // Update corresponding list of errors
       if(val > 0) overs.push_back(val);
       else if(val < 0)
@@ -389,6 +394,8 @@ struct Sapling {
       }
       else perfectPredictions++;
     }
+
+    if(errorsFn.length() > 0) fclose(errorFile);
 
     // Compute maximum/average/etc. errors
     errorStats();
