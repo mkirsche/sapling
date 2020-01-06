@@ -384,7 +384,7 @@ struct Sapling {
       size_t y = sa[i];
       int val = getError(y, predict);
 
-      if(errorsFn.length() > 0) fprintf(errorFile, "%d %d %d %d\n", hash, y, predict, val);
+      if(errorsFn.length() > 0) fprintf(errorFile, "%lld %lld %lld %lld\n", hash, y, predict, val);
 
       // Update corresponding list of errors
       if(val > 0) overs.push_back(val);
