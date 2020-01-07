@@ -21,7 +21,7 @@ struct Sapling {
     int alpha = 2;
     int k = 21;
     int buckets = 18;
-    int maxMem = -1;
+    int maxMem = 10;
     double mostThreshold = 0.95;
     vector<size_t> sa; //sa[i] is the location in the suffix array where character i in reference appears
     vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
@@ -65,6 +65,7 @@ struct Sapling {
       long long yhi = ylist[bucket+1];
       if(xlo == xhi) return ylo;
       long long predict = (long long)(.5 + ylo + (yhi - ylo) * (x - xlo) * 1. / (xhi - xlo));
+      if(predict < 0) predict = 0;
       return (size_t)predict;
     }
     
@@ -118,14 +119,12 @@ struct Sapling {
      */
     long long plQuery(string s, long kmer, size_t length)
     {
-      //cout << s << endl;
       size_t predicted = queryPiecewiseLinear(kmer); // Predicted position in suffix array
       size_t idx = rev[predicted]; // Actual string position where we predict it to be
       size_t lcp = getLcp(idx, s, 0, length);
       if(lcp == length) return idx;
       size_t lo, hi;
       size_t loLcp = -1, hiLcp = -1;
-      //cout << predicted << " " << idx << endl;
       if(lcp + idx == n || s[lcp] > reference[idx+lcp])
       {
         // Suffix is smaller then query - look farther right
@@ -384,7 +383,7 @@ struct Sapling {
       size_t y = sa[i];
       int val = getError(y, predict);
 
-      if(errorsFn.length() > 0) fprintf(errorFile, "%lld %lld %lld %d\n", hash, y, predict, val);
+      if(errorsFn.length() > 0) fprintf(errorFile, "%lld %zu %zu %d\n", hash, y, predict, val);
 
       // Update corresponding list of errors
       //cout << val << endl;

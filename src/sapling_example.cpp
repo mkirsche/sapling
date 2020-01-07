@@ -72,17 +72,6 @@ int main(int argc, char **argv)
       }
     }
 
-   /* if(argc >= 4)
-    {
-      saFnString = argv[2];
-      saplingFnString = argv[3];
-    }
-
-    if(argc >= 5)
-    {
-      numBuckets = atoi(argv[4]);
-    }*/
-
     Sapling sap(refFnString, saFnString, saplingFnString, numBuckets, maxMem, k, errorFnString);
     
     cout << "Testing Sapling" << endl;

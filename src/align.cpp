@@ -87,7 +87,7 @@ class SaplingAligner
         SaplingAligner(char* queryFn, char* refFn)
         {
             string refString = string(refFn);
-            sapling = new Sapling(refString, refString + ".sa", refString + ".sap", -1);
+            sapling = new Sapling(refString, refString + "_k16.sa", refString + "_k16.sap", -1, -1, 16, "");
             aln = new StripedSmithWaterman::Aligner();
             queryReader = new std::ifstream(queryFn);
         }
@@ -117,6 +117,17 @@ class SaplingAligner
         {
             cout << "Aligning reads" << endl;
             FILE *fout = fopen(outFn, "w");
+            fprintf(fout, "@HD\tVN:1.6\tSO:coordinate\n");
+            size_t lastEnd = 0;
+            for (map<string, int>::iterator it = sapling->chrEnds.begin(); it != sapling->chrEnds.end(); it++ )
+            {
+              
+              size_t endCoord = it->second;
+              size_t chrLength = endCoord - lastEnd;
+              string name = it->first;
+              fprintf(fout, "@SQ\tSN:%s\tLN:%zu\n", name.c_str(), chrLength);
+              lastEnd = endCoord;
+            }
             while(1) 
             {
                 string cur = align_next_read(fout);
@@ -143,95 +154,120 @@ class SaplingAligner
             return seed_extend(seq, name, qual, fout);
         }
 
-        string seed_extend(string seq, string name, string qual, FILE *fout)
+        char complement(char c)
+        {
+            if(c == 'A') return 'T';
+            if(c == 'C') return 'G';
+            if(c == 'G') return 'C';
+            if(c == 'T') return 'A';
+            return c;
+        } 
+
+        string revComp(string s)
+        {
+          string res(s.length(), 'A');
+          for(size_t i = 0; i<s.length(); i++) res[i] = complement(s[s.length()-1-i]);
+          return res;
+        }
+
+        string seed_extend(string &readSeq, string &name, string &qual, FILE *fout)
         {
             size_t num_seeds = 7;
-            size_t last = seq.length() - sapling->k;
-            vector<tuple<size_t, size_t, size_t, size_t, size_t>> counts;
-            for(size_t i = 0; i < num_seeds; i++)
-            {
-                size_t cur_pos = 0;
-                if(i == num_seeds - 1) cur_pos = last;
-                else if(i > 0) cur_pos = last / (num_seeds - 1) * i;
-
-                string query = seq.substr(cur_pos, sapling->k);
-                long long val = sapling->kmerize(query);
-                long long ref_pos_signed = sapling->plQuery(query, val, sapling->k);
-                size_t ref_pos = 0;
-                if(ref_pos_signed == -1) continue;
-                else ref_pos = (size_t)ref_pos_signed;
-                string ref_seq = sapling->reference.substr(ref_pos, sapling->k);
-                int strcmp = query.compare(ref_seq);
-                if(!strcmp)
-                {
-                    //cerr << "Getting range for match at position " << ref_pos << endl;
-                    //cerr << "Sequence = " << query << endl;
-                    size_t sa_pos = sapling->sa[ref_pos];
-                    int left = sapling->countHitsLeft(sapling->sa[ref_pos]);
-                    int right = sapling->countHitsRight(sapling->sa[ref_pos]);
-                    
-                    //left = min(left, (int)(sapling->MAX_HITS/2));
-                    //right = min(right, (int)(sapling->MAX_HITS/2));
-                    counts.push_back(
-                      make_tuple(
-                        (size_t)(left + right + 1),
-                        cur_pos,
-                        sa_pos,
-                        left,
-                        right)
-                      );
-                }
-                else
-                {
-                    //cout << "No matches for seed " << i << " found" << endl;
-                }
-            }
-            sort(counts.begin(), counts.end());
+            size_t last = readSeq.length() - sapling->k;
             int best_score = -1;
+            int bestStrand = 0;
             StripedSmithWaterman::Alignment best_alignment;
-            for(size_t i = 0; i<counts.size(); i++)
+            for(int iter = 0; iter < 2; iter++)
             {
-                size_t query_pos = get<1>(counts[i]);
-                size_t left_flank = query_pos;
-                size_t right_flank = seq.length() - query_pos;
-                size_t sa_pos = get<2>(counts[i]);
-                int left = get<3>(counts[i]); 
-                int right = get<4>(counts[i]);
-                if((size_t)(left + right) > sapling->MAX_HITS)
-                {
-                  if(best_score == -1)
+              string seq = iter ? revComp(readSeq) : readSeq;
+              vector<tuple<size_t, size_t, size_t, size_t, size_t>> counts;
+              //cout << "Iter: " << iter << " " << seq << endl;
+              for(size_t i = 0; i < num_seeds; i++)
+              {
+                  size_t cur_pos = 0;
+                  if(i == num_seeds - 1) cur_pos = last;
+                  else if(i > 0) cur_pos = last / (num_seeds - 1) * i;
+
+                  string query = seq.substr(cur_pos, sapling->k);
+                  long long val = sapling->kmerize(query);
+                  long long ref_pos_signed = sapling->plQuery(query, val, sapling->k);
+                  size_t ref_pos = 0;
+                  if(ref_pos_signed == -1) continue;
+                  else ref_pos = (size_t)ref_pos_signed;
+                  string ref_seq = sapling->reference.substr(ref_pos, sapling->k);
+                  int strcmp = query.compare(ref_seq);
+                  //cout << query << " " << ref_seq << endl;  
+                  if(!strcmp)
                   {
-                    left = min(left, (int)(sapling->MAX_HITS/2));
-                    right = min(right, (int)(sapling->MAX_HITS/2));
+                      //cerr << "Getting range for match at position " << ref_pos << endl;
+                      //cerr << "Sequence = " << query << endl;
+                      size_t sa_pos = sapling->sa[ref_pos];
+                      int left = sapling->countHitsLeft(sapling->sa[ref_pos]);
+                      int right = sapling->countHitsRight(sapling->sa[ref_pos]);
+                      
+                      //left = min(left, (int)(sapling->MAX_HITS/2));
+                      //right = min(right, (int)(sapling->MAX_HITS/2));
+                      counts.push_back(
+                        make_tuple(
+                          (size_t)(left + right + 1),
+                          cur_pos,
+                          sa_pos,
+                          left,
+                          right)
+                        );
                   }
                   else
                   {
-                    left = right = 0;
+                      //cout << "No matches for seed " << i << " of " << name << " found" << endl;
                   }
-                }
-
-                for(int offset = -left; offset <= right; offset++)
-                {
-                    size_t ref_pos = sapling->rev[sa_pos + offset];
-                    int ref_left_pos = (int)ref_pos - left_flank - 10;
-                    if(ref_left_pos < 0) ref_left_pos = 0;
-                    size_t ref_right_pos = (int)ref_pos + right_flank + 10;
-                    if(ref_right_pos >= sapling->n) ref_right_pos = sapling->n;
-                    int ref_length = ref_right_pos - ref_left_pos;
-                    string ref_seq = sapling->reference.substr(ref_left_pos, ref_length);
-                    StripedSmithWaterman::Alignment aln_result;
-                    StripedSmithWaterman::Filter filter;
-                    aln->Align(seq.c_str(), ref_seq.c_str(),
-                            ref_seq.length(), filter, &aln_result, 15);
-                    uint16_t cur_score = aln_result.sw_score;
-                    aln_result.ref_begin += ref_left_pos;
-                    if((int)cur_score > best_score)
+              }
+              sort(counts.begin(), counts.end());
+              for(size_t i = 0; i<counts.size(); i++)
+              {
+                  size_t query_pos = get<1>(counts[i]);
+                  size_t left_flank = query_pos;
+                  size_t right_flank = seq.length() - query_pos;
+                  size_t sa_pos = get<2>(counts[i]);
+                  int left = get<3>(counts[i]); 
+                  int right = get<4>(counts[i]);
+                  if((size_t)(left + right) > sapling->MAX_HITS)
+                  {
+                    if(best_score == -1)
                     {
-                        best_score = cur_score;
-                        best_alignment = aln_result;
+                      left = min(left, (int)(sapling->MAX_HITS/2));
+                      right = min(right, (int)(sapling->MAX_HITS/2));
                     }
-                }    
+                    else
+                    {
+                      left = right = 0;
+                    }
+                  }
+
+                  for(int offset = -left; offset <= right; offset++)
+                  {
+                      size_t ref_pos = sapling->rev[sa_pos + offset];
+                      int ref_left_pos = (int)ref_pos - left_flank - 10;
+                      if(ref_left_pos < 0) ref_left_pos = 0;
+                      size_t ref_right_pos = (int)ref_pos + right_flank + 10;
+                      if(ref_right_pos >= sapling->n) ref_right_pos = sapling->n;
+                      int ref_length = ref_right_pos - ref_left_pos;
+                      string ref_seq = sapling->reference.substr(ref_left_pos, ref_length);
+                      StripedSmithWaterman::Alignment aln_result;
+                      StripedSmithWaterman::Filter filter;
+                      aln->Align(seq.c_str(), ref_seq.c_str(),
+                              ref_seq.length(), filter, &aln_result, 15);
+                      uint16_t cur_score = aln_result.sw_score;
+                      aln_result.ref_begin += ref_left_pos;
+                      if((int)cur_score > best_score)
+                      {
+                          best_score = cur_score;
+                          best_alignment = aln_result;
+                          bestStrand = iter;
+                      }
+                  }    
+              }
             }
+            //cout << best_score << " " << bestStrand << endl;
             if(best_score > -1)
             {
                 string refName = "*";
@@ -253,11 +289,11 @@ class SaplingAligner
                   }
                 }
                 best_alignment.ref_begin -= lastEnd;
-                write_sam_alignment(&best_alignment, name, qual, seq, refName, 0, 1, fout);
+                write_sam_alignment(&best_alignment, name, qual, readSeq, refName, bestStrand, 1, fout);
             }
             else
             {
-              write_sam_alignment(&best_alignment, name, qual, seq, "refname", 0, 0, fout);
+              write_sam_alignment(&best_alignment, name, qual, readSeq, "refname", bestStrand, 0, fout);
             }
             return "success";
         }
