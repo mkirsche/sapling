@@ -374,16 +374,16 @@ struct Sapling {
       // Get predicted suffix array position
       size_t predict = queryPiecewiseLinear(hash);
 
-      // Update hash for next time
-      hash &= (1L << (2*(k-1))) - 1;
-      hash <<= 2;
-      if(i + k < s.length()) hash |= vals[(size_t)s[i+k]];
-
       // Get actual suffix array position and figure out the error
       size_t y = sa[i];
       int val = getError(y, predict);
 
       if(errorsFn.length() > 0) fprintf(errorFile, "%lld %zu %zu %d\n", hash, y, predict, val);
+
+      // Update hash for next time
+      hash &= (1L << (2*(k-1))) - 1;
+      hash <<= 2;
+      if(i + k < s.length()) hash |= vals[(size_t)s[i+k]];
 
       // Update corresponding list of errors
       //cout << val << endl;
