@@ -87,7 +87,7 @@ class SaplingAligner
         SaplingAligner(char* queryFn, char* refFn)
         {
             string refString = string(refFn);
-            sapling = new Sapling(refString, refString + "_k16.sa", refString + "_k16.sap", -1, -1, 16, "");
+            sapling = new Sapling(refString, refString + ".sa", refString + "_k16.sap", -1, -1, 16, "");
             aln = new StripedSmithWaterman::Aligner();
             queryReader = new std::ifstream(queryFn);
         }
