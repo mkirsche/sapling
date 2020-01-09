@@ -182,19 +182,17 @@ struct Sapling {
       return rev[revPos];
     }
 
-  size_t MAX_HITS = 32;
-
   /*
    * Counts the number of suffixes to the right of a position which have at least k characters in common with it
    * Used for getting all seeds for alignment
    */
-  size_t countHitsRight(int sa_pos)
+  size_t countHitsRight(size_t sa_pos, size_t maxHits)
   {
-    int lo = sa_pos, hi = sa_pos + MAX_HITS;
-    if(hi > (int)(n - k)) hi = n - k + 1;
+    size_t lo = sa_pos, hi = sa_pos + maxHits;
+    if(hi > (n - k)) hi = n - k + 1;
     while(hi > lo + 1)
     {
-      int mid = (lo + hi)/2;
+      size_t mid = (lo + hi)/2;
       if(lsa.queryLcpFromSAPos(sa_pos, mid))
         lo = mid;
       else
@@ -207,13 +205,13 @@ struct Sapling {
    * Counts the number of suffixes to the left of a position which have at least k characters in common with it
    * Used for getting all seeds for alignment
    */
-  size_t countHitsLeft(int sa_pos)
+  size_t countHitsLeft(size_t sa_pos, size_t maxHits)
   {
-    int  lo = sa_pos - MAX_HITS, hi = sa_pos;
+    size_t lo = sa_pos - maxHits, hi = sa_pos;
     if(lo < 0) lo = -1;
     while(hi > lo + 1)
     {
-      int mid = (lo + hi)/2;
+      size_t mid = (lo + hi)/2;
       if(lsa.queryLcpFromSAPos(mid, sa_pos))
         hi = mid;
       else
