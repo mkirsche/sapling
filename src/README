@@ -1,12 +1,12 @@
-Sapling-based Alignment
+## Sapling-based Alignment
 
-This is a work in progress, but it can be run and produce SAM records using Sapling+Striped-Smith-Waterman.  See the Pending section below to see what remains to be done.  The main program which handles alignment is align.cpp
+The main program which handles alignment is align.cpp
 
 --------------------------------
 Running the full aligner
 --------------------------------
 To build: `make`
-To run: ./align <readsfile> <referencefile> <outfile>
+To run: ./align <readsfile> <referencefile> <outfile> [optional parameters]
     readsfile should be in FASTQ format
     referencefile should be in FASTA format
     outfile will contain a list of SAM records, one per read with the best alignment.
