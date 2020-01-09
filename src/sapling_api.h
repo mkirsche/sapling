@@ -64,7 +64,7 @@ struct Sapling {
       long long ylo = ylist[bucket];
       long long yhi = ylist[bucket+1];
       if(xlo == xhi) return ylo;
-      long long predict = (long long)(.5 + ylo + (yhi - ylo) * (x - xlo) * 1. / (xhi - xlo));
+      long long predict = (long long)(.5 + ylo + (yhi - ylo) * ((x - xlo) * 1. / (xhi - xlo)));
       if(predict < 0) predict = 0;
       return (size_t)predict;
     }
