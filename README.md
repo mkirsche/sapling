@@ -32,3 +32,7 @@ make
     genome is a fasta file containing the genome to query  
     suffix array file is where the suffix array will be written to 
 ```
+
+### Sapling Manual
+
+Information about the files in this repository can be found in the [manual](https://github.com/mkirsche/sapling/wiki/Sapling-Manual).
