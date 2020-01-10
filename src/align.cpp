@@ -1,5 +1,6 @@
 /*
- * Some code used for upgrading Sapling to a full read aligner
+ * A seed-and-extend aligner using Sapling to augment a suffix array for fast seeding
+ * and a striped-smith-waterman algorithm for performing extension
  */
 #include "ssw_cpp.h"
 #include "sapling_api.h"
@@ -21,12 +22,17 @@ size_t flankingSequence = 10;
 int saplingK = 16;
 size_t maxHits = 32;
 
-// Error message for when the user provides the wrong parameters
+/*
+ * Error message for when the user provides the wrong parameters
+ */
 void usage()
 {
     printf("usage: ./align <query> <ref> <outfile> [num_seeds=<int>] [sapling_k=<int>] [flanking_sequence=<int>] [max_hits=<int>]\n");
 }
 
+/*
+ * Parser for the command line arguments
+ */
 void parseArgs(int argc, char** argv)
 {
   queryFn = argv[1];
@@ -231,6 +237,7 @@ class SaplingAligner
             return seed_extend(seq, name, qual, fout);
         }
 
+        // The complement of a given base-pair character
         char complement(char c)
         {
             if(c == 'A') return 'T';
@@ -240,6 +247,7 @@ class SaplingAligner
             return c;
         } 
 
+        // The reverse complement of a genomic string
         string revComp(string s)
         {
           string res(s.length(), 'A');
@@ -247,6 +255,7 @@ class SaplingAligner
           return res;
         }
 
+        // Performs seed-and-extend alignment of a given read and writes the alignment to a file
         string seed_extend(string &readSeq, string &name, string &qual, FILE *fout)
         {
             size_t last = readSeq.length() - sapling->k;
@@ -257,7 +266,6 @@ class SaplingAligner
             {
               string seq = iter ? revComp(readSeq) : readSeq;
               vector<tuple<size_t, size_t, size_t, size_t, size_t>> counts;
-              //cout << "Iter: " << iter << " " << seq << endl;
               for(size_t i = 0; i < num_seeds; i++)
               {
                   size_t cur_pos = 0;
@@ -272,11 +280,8 @@ class SaplingAligner
                   else ref_pos = (size_t)ref_pos_signed;
                   string ref_seq = sapling->reference.substr(ref_pos, sapling->k);
                   int strcmp = query.compare(ref_seq);
-                  //cout << query << " " << ref_seq << endl;  
                   if(!strcmp)
                   {
-                      //cerr << "Getting range for match at position " << ref_pos << endl;
-                      //cerr << "Sequence = " << query << endl;
                       size_t sa_pos = sapling->sa[ref_pos];
                       size_t left = sapling->countHitsLeft(sapling->sa[ref_pos], maxHits);
                       size_t right = sapling->countHitsRight(sapling->sa[ref_pos], maxHits);
@@ -289,10 +294,6 @@ class SaplingAligner
                           left,
                           right)
                         );
-                  }
-                  else
-                  {
-                      //cout << "No matches for seed " << i << " of " << name << " found" << endl;
                   }
               }
               sort(counts.begin(), counts.end());
@@ -341,7 +342,6 @@ class SaplingAligner
                   }    
               }
             }
-            //cout << best_score << " " << bestStrand << endl;
             if(best_score > -1)
             {
                 string refName = "*";

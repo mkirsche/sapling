@@ -1,5 +1,6 @@
 /*
  * An example of how to build and query Sapling.
+ * This script also gives the timing of the Sapling queries in isolation, so is useful for benchmarking.
  */
 
 #include <chrono>
@@ -33,6 +34,7 @@ int main(int argc, char **argv)
     saFnString = refFnString + ".sa";
     saplingFnString = refFnString + ".sap";
 
+    // Parse the command line arguments
     for(int i = 2; i<argc; i++)
     {
       string cur = argv[i];
@@ -72,6 +74,7 @@ int main(int argc, char **argv)
       }
     }
 
+    // Build the Sapling data structure
     Sapling sap(refFnString, saFnString, saplingFnString, numBuckets, maxMem, k, errorFnString);
     
     cout << "Testing Sapling" << endl;

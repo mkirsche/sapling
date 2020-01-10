@@ -27,7 +27,7 @@ struct SuffixArray {
     size_t krmqk = 0;
     vector<size_t> krmqb;
 
-    // Say for each position in the lcp array, where the next lcp value < k starting there
+    // Say for each position in the lcp array, where the next lcp value less then k is which occurs at or after that position
     void krmq_init(size_t kk)
     {
       krmqk = kk;
