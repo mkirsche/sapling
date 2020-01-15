@@ -631,7 +631,6 @@ static cigar* banded_sw (const int8_t* ref,
 			edge = end + 1 < width - 1 ? end + 1 : width - 1;
 			f = h_b[0] = e_b[0] = h_b[edge] = e_b[edge] = h_c[0] = 0;
 			direction_line = direction + width_d * i * 3;
-
 			for (j = beg; LIKELY(j <= end); j ++) {
 				int32_t b, e1, f1, d, de, df, dh;
 				set_u(u, band_width, i, j);	set_u(e, band_width, i - 1, j);
@@ -644,18 +643,15 @@ static cigar* banded_sw (const int8_t* ref,
 				temp2 = i == 0 ? -weight_gapE : e_b[e] - weight_gapE;
 				e_b[u] = temp1 > temp2 ? temp1 : temp2;
 				direction_line[de] = temp1 > temp2 ? 3 : 2;
-
 				temp1 = h_c[b] - weight_gapO;
 				temp2 = f - weight_gapE;
 				f = temp1 > temp2 ? temp1 : temp2;
 				direction_line[df] = temp1 > temp2 ? 5 : 4;
-
 				e1 = e_b[u] > 0 ? e_b[u] : 0;
 				f1 = f > 0 ? f : 0;
 				temp1 = e1 > f1 ? e1 : f1;
 				temp2 = h_b[d] + mat[ref[j] * n + read[i]];
 				h_c[u] = temp1 > temp2 ? temp1 : temp2;
-
 				if (h_c[u] > max) max = h_c[u];
 
 				if (temp1 <= temp2) direction_line[dh] = 1;
@@ -664,9 +660,9 @@ static cigar* banded_sw (const int8_t* ref,
 			for (j = 1; j <= u; j ++) h_b[j] = h_c[j];
 		}
 		band_width *= 2;
-	} while (LIKELY(max < score));
+	} while (LIKELY(max < score && band_width < readLen));
 	band_width /= 2;
-
+	
 	// trace back
 	i = readLen - 1;
 	j = refLen - 1;
@@ -834,7 +830,7 @@ s_align* ssw_align (const s_profile* prof,
 	if (maskLen < 15) {
 		fprintf(stderr, "When maskLen < 15, the function ssw_align doesn't return 2nd best alignment information.\n");
 	}
-
+	
 	// Find the alignment scores and ending positions
 	if (prof->profile_byte) {
 		bests = sw_sse2_byte(ref, 0, refLen, readLen, weight_gapO, weight_gapE, prof->profile_byte, -1, prof->bias, maskLen);
