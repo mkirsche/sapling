@@ -601,8 +601,8 @@ struct Sapling
       }
       else
       {
-        int xlsize = (1<<buckets)+1;
-        fwrite(&xlsize, sizeof(int), 1, outfile);
+        size_t xlsize = (1LL<<buckets)+1;
+        fwrite(&xlsize, sizeof(size_t), 1, outfile);
       }
       fwrite(&xlist[0], sizeof(long long), xlistsize, outfile);
       fwrite(&ylist[0], sizeof(long long), xlistsize, outfile);
