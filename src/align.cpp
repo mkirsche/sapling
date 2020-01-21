@@ -330,8 +330,9 @@ class SaplingAligner
                       string ref_seq = sapling->reference.substr(ref_left_pos, ref_length);
                       StripedSmithWaterman::Alignment aln_result;
                       StripedSmithWaterman::Filter filter;
-                      aln->Align(seq.c_str(), ref_seq.c_str(),
+                      bool okay = aln->Align(seq.c_str(), ref_seq.c_str(),
                               ref_seq.length(), filter, &aln_result, 15);
+                      if(!okay) continue;
                       uint16_t cur_score = aln_result.sw_score;
                       if((int)cur_score > best_score)
                       {
