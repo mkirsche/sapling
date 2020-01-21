@@ -56,7 +56,7 @@ struct Sapling
   string errorsFn = "";
 
   // Map from chromosome to last position in genome which is part of that chromosome (zero-indexed)
-  map<string, int> chrEnds;
+  map<size_t, string> chrEnds;
 
   // The integer encoding of each base-pair: vals['A'] = 0, vals['C'] = 1, vals['G'] = 2, vals['T'] = 3
   int vals[256];
@@ -478,7 +478,7 @@ struct Sapling
       {
         if(curName.length() > 0)
         {
-          chrEnds[curName] = charCount;
+          chrEnds[charCount] = curName;
         }
         auto first_token = cur.substr(0, cur.find(' '));
         curName = first_token.substr(1);
@@ -486,7 +486,7 @@ struct Sapling
     }
     if(curName.length() > 0)
     {
-      chrEnds[curName] = charCount;
+      chrEnds[charCount] = curName;
     }
     reference = out.str();
       

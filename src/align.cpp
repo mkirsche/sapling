@@ -196,12 +196,12 @@ class SaplingAligner
             FILE *fout = fopen(outFn, "w");
             fprintf(fout, "@HD\tVN:1.6\tSO:coordinate\n");
             size_t lastEnd = 0;
-            for (map<string, int>::iterator it = sapling->chrEnds.begin(); it != sapling->chrEnds.end(); it++ )
+            for (map<size_t, string>::iterator it = sapling->chrEnds.begin(); it != sapling->chrEnds.end(); it++ )
             {
               
-              size_t endCoord = it->second;
+              size_t endCoord = it->first;
               size_t chrLength = endCoord - lastEnd;
-              string name = it->first;
+              string name = it->second;
               fprintf(fout, "@SQ\tSN:%s\tLN:%zu\n", name.c_str(), chrLength);
               lastEnd = endCoord;
             }
@@ -262,6 +262,7 @@ class SaplingAligner
             int best_score = -1;
             int bestStrand = 0;
             StripedSmithWaterman::Alignment best_alignment;
+            size_t best_offset = 0;
             for(int iter = 0; iter < 2; iter++)
             {
               string seq = iter ? revComp(readSeq) : readSeq;
@@ -332,11 +333,11 @@ class SaplingAligner
                       aln->Align(seq.c_str(), ref_seq.c_str(),
                               ref_seq.length(), filter, &aln_result, 15);
                       uint16_t cur_score = aln_result.sw_score;
-                      aln_result.ref_begin += ref_left_pos;
                       if((int)cur_score > best_score)
                       {
                           best_score = cur_score;
                           best_alignment = aln_result;
+                          best_offset = ref_left_pos;
                           bestStrand = iter;
                       }
                   }    
@@ -347,22 +348,22 @@ class SaplingAligner
                 string refName = "*";
                 size_t bestEnd = 0;
                 size_t lastEnd = 0;
-                map<string, int>::iterator it;
+                map<size_t, string>::iterator it;
 
                 for ( it = sapling->chrEnds.begin(); it != sapling->chrEnds.end(); it++ )
                 {
-                  size_t endCoord = it->second;
-                  if((long long)endCoord > best_alignment.ref_begin && (bestEnd == 0 || endCoord < bestEnd))
+                  size_t endCoord = it->first;
+                  if((long long)endCoord > best_alignment.ref_begin + best_offset && (bestEnd == 0 || endCoord < bestEnd))
                   {
                     bestEnd = endCoord;
-                    refName = it->first;
+                    refName = it->second;
                   }
-                  if((long long)endCoord <= best_alignment.ref_begin && (lastEnd == 0 || endCoord > lastEnd))
+                  if((long long)endCoord <= best_alignment.ref_begin + best_offset && (lastEnd == 0 || endCoord > lastEnd))
                   {
                     lastEnd = endCoord;
                   }
                 }
-                best_alignment.ref_begin -= lastEnd;
+                best_alignment.ref_begin += best_offset - lastEnd;
                 write_sam_alignment(&best_alignment, name, qual, readSeq, refName, bestStrand, 1, fout);
             }
             else
