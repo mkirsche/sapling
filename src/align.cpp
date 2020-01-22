@@ -263,7 +263,8 @@ class SaplingAligner
             int bestStrand = 0;
             StripedSmithWaterman::Alignment best_alignment;
             size_t best_offset = 0;
-            for(int iter = 0; iter < 2; iter++)
+            bool done = 0;
+            for(int iter = 0; iter < 2 && !done; iter++)
             {
               string seq = iter ? revComp(readSeq) : readSeq;
               vector<tuple<size_t, size_t, size_t, size_t, size_t>> counts;
@@ -298,7 +299,7 @@ class SaplingAligner
                   }
               }
               sort(counts.begin(), counts.end());
-              for(size_t i = 0; i<counts.size(); i++)
+              for(size_t i = 0; i<counts.size() && !done; i++)
               {
                   size_t query_pos = get<1>(counts[i]);
                   size_t left_flank = query_pos;
@@ -319,7 +320,7 @@ class SaplingAligner
                     }
                   }
 
-                  for(int offset = -left; offset <= right; offset++)
+                  for(int offset = -left; offset <= right && !done; offset++)
                   {
                       size_t ref_pos = sapling->rev[sa_pos + offset];
                       long long ref_left_pos = (long long)ref_pos - left_flank - flankingSequence;
@@ -336,6 +337,10 @@ class SaplingAligner
                       uint16_t cur_score = aln_result.sw_score;
                       if((int)cur_score > best_score)
                       {
+                          if(aln_result.mismatches == 0)
+                          {
+                            done = 1;
+                          }
                           best_score = cur_score;
                           best_alignment = aln_result;
                           best_offset = ref_left_pos;
@@ -354,12 +359,12 @@ class SaplingAligner
                 for ( it = sapling->chrEnds.begin(); it != sapling->chrEnds.end(); it++ )
                 {
                   size_t endCoord = it->first;
-                  if((long long)endCoord > best_alignment.ref_begin + best_offset && (bestEnd == 0 || endCoord < bestEnd))
+                  if(endCoord > best_alignment.ref_begin + best_offset && (bestEnd == 0 || endCoord < bestEnd))
                   {
                     bestEnd = endCoord;
                     refName = it->second;
                   }
-                  if((long long)endCoord <= best_alignment.ref_begin + best_offset && (lastEnd == 0 || endCoord > lastEnd))
+                  if(endCoord <= best_alignment.ref_begin + best_offset && (lastEnd == 0 || endCoord > lastEnd))
                   {
                     lastEnd = endCoord;
                   }
