@@ -337,7 +337,7 @@ class SaplingAligner
                       uint16_t cur_score = aln_result.sw_score;
                       if((int)cur_score > best_score)
                       {
-                          if(aln_result.mismatches == 0)
+                          if(aln_result.mismatches == 0 && aln_result.cigar.size() == 1)
                           {
                             done = 1;
                           }
