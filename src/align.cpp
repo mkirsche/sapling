@@ -18,7 +18,7 @@ char* queryFn;
 char* refFn;
 char* outFn;
 size_t num_seeds = 7;
-size_t flankingSequence = 10;
+size_t flankingSequence = 2;
 int saplingK = 16;
 size_t maxHits = 32;
 
