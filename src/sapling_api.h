@@ -215,7 +215,10 @@ struct Sapling
   {
     for(size_t i = 0; i<maxHits; i++)
     {
-     // if(sa_pos + i > (n - k) || lsa.lcp[sa_pos + i] < (size_t)k) return i;
+      if(i + sa_pos > (n - k) || lsa.lcp[i + sa_pos] < (size_t)k)
+      {
+        return i;
+      }
     }
     return maxHits;
     /*
@@ -241,7 +244,7 @@ struct Sapling
   {
     for(size_t i = 0; i<maxHits; i++)
     {
-     // if(sa_pos < i || lsa.lcp[sa_pos - i] < (size_t)k) return i;
+      if(sa_pos < i || lsa.lcp[sa_pos - i] < (size_t)k) return i;
     }
     return maxHits;
     /*
@@ -535,6 +538,7 @@ struct Sapling
       cout << "Constructing RMQ" << endl;
       lsa.lcp = lcp;
       if(!saplingf.good()) lsa.krmq_init(k);
+
       lsa.inv = sa;
           
       cout << "Loaded suffix array of size " << sa.size() << endl;
