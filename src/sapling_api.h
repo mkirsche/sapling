@@ -213,7 +213,13 @@ struct Sapling
    */
   size_t countHitsRight(size_t sa_pos, size_t maxHits)
   {
-    for(size_t i = 0; i<maxHits; i++) if(lsa.lcp[i] < (size_t)k) return i;
+    for(size_t i = 0; i<maxHits; i++)
+    {
+      if(i + sa_pos > (n - k) || lsa.lcp[i + sa_pos] < (size_t)k)
+      {
+        return i;
+      }
+    }
     return maxHits;
     /*
     size_t lo = sa_pos, hi = sa_pos + maxHits;
@@ -527,7 +533,7 @@ struct Sapling
           
       cout << "Constructing RMQ" << endl;
       lsa.lcp = lcp;
-      lsa.krmq_init(k);
+      //lsa.krmq_init(k);
       lsa.inv = sa;
           
       cout << "Loaded suffix array of size " << sa.size() << endl;
@@ -550,7 +556,7 @@ struct Sapling
       cout << "Built suffix array of size " << sa.size() << endl;
     }
 
-    vector<size_t>().swap(lsa.lcp);
+    //vector<size_t>().swap(lsa.lcp);
     
     // Get the sapling data structure - either read from a file or generate it
     cout << "Initializing rev and sa" << endl;
