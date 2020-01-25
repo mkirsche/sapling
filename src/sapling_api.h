@@ -213,6 +213,9 @@ struct Sapling
    */
   size_t countHitsRight(size_t sa_pos, size_t maxHits)
   {
+    for(size_t i = 0; i<maxHits; i++) if(lsa.lcp[i] < (size_t)k) return i;
+    return maxHits;
+    /*
     size_t lo = sa_pos, hi = sa_pos + maxHits;
     if(hi > (n - k)) hi = n - k + 1;
     while(hi > lo + 1)
@@ -224,6 +227,7 @@ struct Sapling
         hi = mid;
     }
     return lo - sa_pos;
+    */
    }
 
   /*
@@ -232,6 +236,12 @@ struct Sapling
    */
   size_t countHitsLeft(size_t sa_pos, size_t maxHits)
   {
+    for(size_t i = 0; i<maxHits; i++)
+    {
+      if(sa_pos < i || lsa.lcp[sa_pos - i] < (size_t)k) return i;
+    }
+    return maxHits;
+    /*
     size_t lo = sa_pos - maxHits, hi = sa_pos;
     if(lo < 0) lo = -1;
     while(hi > lo + 1)
@@ -243,6 +253,7 @@ struct Sapling
         lo = mid;
     }
     return sa_pos - hi;
+    */
   }
   
   /*

@@ -388,7 +388,16 @@ bool Aligner::Align(const char* query, const char* ref, const int& ref_len,
                                  static_cast<int>(gap_opening_penalty_),
 				 static_cast<int>(gap_extending_penalty_),
 				 flag, filter.score_filter, filter.distance_filter, maskLen);
-
+				 
+  if(s_al == NULL)
+  {
+    delete [] translated_query;
+    delete [] translated_ref;
+    align_destroy(s_al);
+    init_destroy(profile);
+    return false;
+  }
+				 
   alignment->Clear();
   ConvertAlignment(*s_al, query_len, alignment);
   alignment->mismatches = CalculateNumberMismatch(&*alignment, translated_ref, translated_query, query_len);

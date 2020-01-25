@@ -326,7 +326,7 @@ class SaplingAligner
                       long long ref_left_pos = (long long)ref_pos - left_flank - flankingSequence;
                       if(ref_left_pos < 0) ref_left_pos = 0;
                       long long ref_right_pos = (long long)ref_pos + right_flank + flankingSequence;
-                      if((size_t)ref_right_pos >= sapling->n) ref_right_pos = sapling->n;
+                      if((size_t)ref_right_pos >= sapling->n) continue;
                       int ref_length = ref_right_pos - ref_left_pos;
                       string ref_seq = sapling->reference.substr(ref_left_pos, ref_length);
                       StripedSmithWaterman::Alignment aln_result;
