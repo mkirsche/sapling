@@ -213,7 +213,10 @@ struct Sapling
    */
   size_t countHitsRight(size_t sa_pos, size_t maxHits)
   {
-    for(size_t i = 0; i<maxHits; i++) if(lsa.lcp[i] < (size_t)k) return i;
+    for(size_t i = 0; i<maxHits; i++)
+    {
+     // if(sa_pos + i > (n - k) || lsa.lcp[sa_pos + i] < (size_t)k) return i;
+    }
     return maxHits;
     /*
     size_t lo = sa_pos, hi = sa_pos + maxHits;
@@ -238,7 +241,7 @@ struct Sapling
   {
     for(size_t i = 0; i<maxHits; i++)
     {
-      if(sa_pos < i || lsa.lcp[sa_pos - i] < (size_t)k) return i;
+     // if(sa_pos < i || lsa.lcp[sa_pos - i] < (size_t)k) return i;
     }
     return maxHits;
     /*
@@ -506,6 +509,10 @@ struct Sapling
     // Get the suffix array - either read from a file or generate it
     const char *fn = saFnString.c_str();
     ifstream f(fn);
+    
+    const char *saplingfn = saplingFnString.c_str();
+    ifstream saplingf(saplingfn);
+    
     if(f.good())
     {
       cout << "Reading suffix array from file" << endl;
@@ -527,7 +534,7 @@ struct Sapling
           
       cout << "Constructing RMQ" << endl;
       lsa.lcp = lcp;
-      lsa.krmq_init(k);
+      if(!saplingf.good()) lsa.krmq_init(k);
       lsa.inv = sa;
           
       cout << "Loaded suffix array of size " << sa.size() << endl;
@@ -550,7 +557,7 @@ struct Sapling
       cout << "Built suffix array of size " << sa.size() << endl;
     }
 
-    vector<size_t>().swap(lsa.lcp);
+    //vector<size_t>().swap(lsa.lcp);
     
     // Get the sapling data structure - either read from a file or generate it
     cout << "Initializing rev and sa" << endl;
@@ -558,8 +565,6 @@ struct Sapling
     cout << "Filling rev and sa" << endl;
     for(size_t i = 0; i<n; i++) rev[sa[i]] = i;
     
-    const char *saplingfn = saplingFnString.c_str();
-    ifstream saplingf(saplingfn);
     if(saplingf.good())
     {
       cout << "Reading Sapling from file" << endl;
