@@ -11,12 +11,12 @@ make
 
 ### Pre-building the Suffix Array:
 ```
-suffixarray/refToSuffixArray.sh <genome file (Fasta)>
+suffixarray/refToSuffixArray.sh <genome file (Fasta format)>
  ```
   
 ### Running SAPLING test:  
 ```
-src/sapling_example <genome file (Fasta)> 
+src/sapling_example <genome file (Fasta format)> 
   [saFn=<suffix array file (format described in manual, default <genome file>.sa)>] 
   [sapFn=<sapling file (format described in manual, default <genome file>.sap>] 
   [nb=<log number of buckets - overrides maxMem below, default None>] 
@@ -28,7 +28,7 @@ src/sapling_example <genome file (Fasta)>
   
 ### Running aligner:
 ```
-src/align <query (Fastq)> <ref (Fasta)> <outfile (Sam)> 
+src/align <query (Fastq format)> <ref (Fasta format)> <outfile (Sam format)> 
   [num_seeds=<number of seeds to use for exact matching, default 7>]
   [sapling_k=<size of k-mers to use when building Sapling, default 16>]
   [flanking_sequence=<amount of padding to include when aligning region around seeds, default 2>]
