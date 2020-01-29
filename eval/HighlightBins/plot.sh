@@ -11,4 +11,4 @@ highlightfile=$fn'.highlights'
 
 javac $BINDIR/*.java
 java -cp $BINDIR BestAndWorstBins $fn $highlightfile 10
-python $BIDIR/hist.py $highlightfile
+python $BINDIR/hist.py $highlightfile
