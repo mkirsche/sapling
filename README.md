@@ -10,8 +10,9 @@ make
 ```
 
 ### Pre-building the Suffix Array:
-
+```
 suffixarray/refToSuffixArray.sh <genome file (Fasta)>
+ ```
   
 ### Running SAPLING test:  
 ```
