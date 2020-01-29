@@ -5,7 +5,6 @@ A method for achieving faster suffix array queries compared to binary search.
 ### Building:
 ```
 cd src
-./build.sh
 make
 ```
 
