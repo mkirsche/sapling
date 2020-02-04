@@ -15,7 +15,7 @@ sort -k2,2 -k1n,1 <fasta>.ref.sa -o <fasta>.ref.sorted.sa
 ```
 
 ## Processing the suffix array
-To process the sorted suffix array (.sa) before using any of the python files, please run the following:
+To process the sorted suffix array file (sa) before using any of the python files, please run the following:
 
 ```
 cat sa | awk '{print $2}' | sed s/'A'/'00'/g | sed s/'C'/'01'/g | sed s/'G'/'10'/g | sed s/'T'/'11'/g > sa.bin
