@@ -3,14 +3,22 @@
 To generate the suffix array, please run:
 
 ```
-TODO
+g++ -o sampleSa sampleSa.cpp
+
+suffixarray/refToSuffixArray <fasta>; eval/SuffixArraySample/sampleSa <fasta>.ref <fasta>.ref.sa;
+```
+
+We then need to sort the suffix array into lexicographic order, so run the following:
+
+```
+sort -k2,2 -k1n,1 <fasta>.ref.sa -o <fasta>.ref.sorted.sa
 ```
 
 ## Processing the suffix array
-To process the suffix array (sa.gz) before using any of the python files, please run the following:
+To process the sorted suffix array (.sa) before using any of the python files, please run the following:
 
 ```
-gzcat sa.gz | awk '{print $2}' | sed s/'A'/'00'/g | sed s/'C'/'01'/g | sed s/'G'/'10'/g | sed s/'T'/'11'/g > sa.bin
+cat sa | awk '{print $2}' | sed s/'A'/'00'/g | sed s/'C'/'01'/g | sed s/'G'/'10'/g | sed s/'T'/'11'/g > sa.bin
 ```
 ```
 (echo 'obase=10;ibase=2;'; cat sa.bin) | bc | awk '{print $1, NR}' > sa.key.row
