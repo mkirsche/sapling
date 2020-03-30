@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+
+#define myint unsigned int
  
 using namespace std;
 
@@ -25,18 +27,18 @@ struct SuffixArray {
     vector<size_t> lcp;
     
     size_t krmqk = 0;
-    vector<size_t> krmqb;
+    vector<myint> krmqb;
 
-    // Say for each position in the lcp array, where the next lcp value less then k is which occurs at or after that position
+    // Say for each position in the lcp array, how far to the right the next lcp value less then k is which occurs at or after that position
     void krmq_init(size_t kk)
     {
       krmqk = kk;
       size_t n = lcp.size();
       krmqb.resize(n+1);
-      krmqb[n] = n;
+      krmqb[n] = 0;
       for(size_t i = n; i-->0 ;)
       {
-          krmqb[i] = (lcp[i] < krmqk) ? i : krmqb[i+1];
+          krmqb[i] = (lcp[i] < krmqk) ? 0 : (1 + krmqb[i+1]);
       }
     }
 
@@ -45,7 +47,7 @@ struct SuffixArray {
     int krmq_query(size_t i, size_t j)
     {
         //cout << i << " " << j << " " << krmqb[i] << endl;
-        return (i > j) || (krmqb[i] > j);
+        return (i > j) || ((size_t)krmqb[i] +  i > j);
     }
 
     // Whether suffixes with indices a and b in sorted order have lcp >= k

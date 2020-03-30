@@ -375,7 +375,7 @@ struct Sapling
       if(i + k < s.length()) hash |= vals[(size_t)s[i+k]];
 
       // y is the suffix array position
-      size_t y = sa[i];
+      size_t y = lsa.inv[i];
 
       // See if this is a new checkpoint
       size_t bucket = (x >> (alpha*k - buckets));
@@ -421,7 +421,7 @@ struct Sapling
       size_t predict = queryPiecewiseLinear(hash);
 
       // Get actual suffix array position and figure out the error
-      size_t y = sa[i];
+      size_t y = lsa.inv[i];
       int val = getError(y, predict);
 
       if(errorsFn.length() > 0) fprintf(errorFile, "%lld %zu %zu %d\n", hash, y, predict, val);
@@ -519,46 +519,47 @@ struct Sapling
     if(f.good())
     {
       cout << "Reading suffix array from file" << endl;
+      
+      lsa = SuffixArray();
+      
       FILE *infile = fopen (fn, "rb");
       size_t size;
       size_t err = fread(&size, sizeof(size_t), 1, infile);
-      sa.resize(size);
-      err = fread(&sa[0], sizeof(size_t), size, infile);
-      
-      vector<size_t> lcp;
+      cout << size << endl;
+      lsa.inv = vector<size_t>();
+      lsa.inv.resize(size);
+      err = fread(&lsa.inv[0], sizeof(size_t), size, infile);
+      cout << lsa.inv.size() << endl;
+      cout << lsa.inv[0] << endl;
       err = fread(&size, sizeof(size_t), 1, infile);
-      lcp.resize(size);
-      err = fread(&lcp[0], sizeof(size_t), size, infile);
+      lsa.lcp = vector<size_t>();
+      lsa.lcp.resize(size);
+      err = fread(&lsa.lcp[0], sizeof(size_t), size, infile);
       if(err == 0)
       {
         cerr << "Error reading suffix array from file" << endl;
       }
-      lsa = SuffixArray();
           
       cout << "Constructing RMQ" << endl;
-      lsa.lcp = lcp;
       if(!saplingf.good()) lsa.krmq_init(k);
 
-      lsa.inv = sa;
-          
-      cout << "Loaded suffix array of size " << sa.size() << endl;
+      cout << "Loaded suffix array of size " << lsa.inv.size() << endl;
     }
     else
     {
       cout << "Building suffix array" << endl;
       lsa = sa_init3(reference, alpha);
       cout << "Writing suffix array to file" << endl;
-      sa = lsa.inv;
       FILE *outfile = fopen (fn, "wb");
-      size_t size = sa.size();
+      size_t size = lsa.inv.size();
       fwrite(&size, sizeof(size_t), 1, outfile);
-      fwrite(&sa[0], sizeof(size_t), size, outfile);
+      fwrite(&lsa.inv[0], sizeof(size_t), size, outfile);
       size = lsa.lcp.size();
       fwrite(&size, sizeof(size_t), 1, outfile);
       fwrite(&lsa.lcp[0], sizeof(size_t), size, outfile);
       cout << "Making LCP RMQ" << endl;
       lsa.krmq_init(k);
-      cout << "Built suffix array of size " << sa.size() << endl;
+      cout << "Built suffix array of size " << lsa.inv.size() << endl;
     }
 
     //vector<size_t>().swap(lsa.lcp);
@@ -567,7 +568,7 @@ struct Sapling
     cout << "Initializing rev and sa" << endl;
     rev = vector<size_t>(n, 0);
     cout << "Filling rev and sa" << endl;
-    for(size_t i = 0; i<n; i++) rev[sa[i]] = i;
+    for(size_t i = 0; i<n; i++) rev[lsa.inv[i]] = i;
     
     if(saplingf.good())
     {
