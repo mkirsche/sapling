@@ -12,7 +12,7 @@
 using namespace std::chrono;
 
 vector<size_t> rev; // the inverse of sa sa[rev[i]] = i for all i
-vector<size_t> llcp, rlcp;
+vector<unsigned int> llcp, rlcp;
 
 string reference;
 
@@ -65,7 +65,7 @@ size_t calcLLCP(size_t lo, size_t hi)
   if(hi == lo + 1) return n;
 	size_t mid = (lo + hi) >> 1;
 	size_t res = min(calcLLCP(lo, mid), calcRLCP(lo, mid));
-	llcp[mid] = res;
+	llcp[mid] = (unsigned int)res;
 	return res;
 }
 
@@ -75,7 +75,7 @@ size_t calcRLCP(size_t lo, size_t hi)
   if(hi == lo + 1) return lsa.lcp[lo];
   size_t mid = (lo + hi) >> 1;
 	size_t res = min(calcLLCP(mid, hi), calcRLCP(mid, hi));
-	rlcp[mid] = res;
+	rlcp[mid] = (unsigned int)res;
 	return res;
 }
 
