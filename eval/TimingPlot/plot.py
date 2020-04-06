@@ -17,11 +17,11 @@ xs = [4641652, 100286401, 230481012, 782475302, 2934876451, 14271578887]
 logxs = [math.log(i, 2) for i in xs]
 
 # Runtimes
-sapling00001 = [45.2589, 100.803, 100.316, 137.476, 168.62, 222.989]
-saplingOnePercent = [22.4503, 70.4513, 71.3830, 82.0073, 114.502, 179.87]
-#saplingTenPercent = [16.4947, 62.9823, 55.3909, 94.6657, 135.960, 123.117]
-saplingTwentyfivePercent = [15.7859, 45.6998, 69.0131, 62.7804, 87.2305, 115.208]
-binSearch = [97.197, 171.466, 181.537, 235.254, 301.056, 369.465]
+sapling00001 = [64.1779, 114.843, 116.667, 131.352, 155.422, 222.989]
+saplingOnePercent = [24.7783, 72.6055, 73.4093, 77.2295, 113.859, 179.87]
+#saplingTenPercent = [19.5705,53.525, 60.0477, 60.2346, 91.2241, 123.117]
+saplingTwentyfivePercent = [19.007, 48.6434, 57.5504, 58.5787, 83.7056, 115.208]
+binSearch = [93.8439, 173.31, 192.317, 222.014, 288.3, 369.465]
 runtimeNames = ['Binary Search', 'Sapling 0.01% Overhead', 'Sapling 1% Overhead', 'Sapling 25% Overhead']
 
 sns.lineplot(logxs, binSearch, marker = "o")

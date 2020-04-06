@@ -17,14 +17,14 @@ pal = sns.color_palette()
 logxs = [i for i in range(6, 30)]
 
 # Runtimes
-saplingRuntimes = [291.782, 277.642 , 261.552, 251.606, 244.442, 252.177, 251.159, 190.957, 209.15, 183.053,
-203.781, 167.8, 168.62, 159.528, 152.803, 131.041, 119.709, 142.572, 114.502, 133.928, 137.158, 114.152, 
-135.96, 87.2305]
+saplingRuntimes = [272.504, 271.494, 283.534, 195.717, 213.098, 199.751, 193.502, 190.024, 178.008,
+  208.957, 193.096, 193.263, 155.422, 152.319, 132.068, 162.492, 120.197, 116.291, 113.859, 106.215,
+99.927, 89.7132, 91.2241, 83.7056]
 runtimeNames = ['Bowtie', 'Mummer', 'Binary Search', 'Sapling']
 
-bowtieTime = 564
-mummerTime = 396.905
-binarySearchTime = 301.056
+bowtieTime = 558
+mummerTime = 360.728
+binarySearchTime = 288.3
 
 current_palette = sns.color_palette()
 
