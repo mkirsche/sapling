@@ -76,6 +76,20 @@ struct Sapling
     for(int i = 0; i<k; i++) kmer = (kmer << alpha) | vals[(size_t)s[i]];
     return kmer;
   }
+
+  /*
+   * Hashes a string that may not be length k into 
+   */
+  long long kmerizeAdjusted(int length, const string& s)
+  {
+	if(length >= k) return kmerize(s);
+    long long kmer = 0;
+    for(int i = 0; i<length; i++) kmer = (kmer << alpha) | vals[(size_t)s[i]];
+    kmer = (kmer << alpha) | 2; // Pad with a g to get closer to middle of the range
+    return kmer << (2 * (k - length - 1));
+  }
+
+  
   
   /*
    * Queries the piecewise linear index for a given kmer value.
@@ -163,10 +177,23 @@ struct Sapling
         // Bad case: over-prediction still not high enough
         lo = hi;
         loLcp = oLcp;
-        hi = min(n-1, predicted + maxOver);
+        hi = min(n-1, predicted + maxOver + 1);
         hiIdx = rev[hi];
         oLcp = getLcp(hiIdx, s, 0, length);
         if(oLcp == length) return hiIdx;
+		if(s.length() > k)
+		{
+			while(oLcp + hiIdx != n && s[oLcp] > reference[hiIdx+oLcp])
+			{
+				lo = hi;
+				loLcp = oLcp;
+				hi += maxOver;
+				hi = min(n-1, hi);
+				hiIdx = rev[hi];
+        		oLcp = getLcp(hiIdx, s, 0, length);
+        		if(oLcp == s.length()) return hiIdx;
+			}
+		}
         hiLcp = oLcp;
       }
       else
@@ -195,10 +222,23 @@ struct Sapling
         // Bad case: under-prediction still not low enough
         hi = lo;
         hiLcp = oLcp;
-        lo = (size_t)max(0, (int)predicted-maxUnder);
+        lo = (size_t)max(0, (int)predicted-maxUnder - 1);
         loIdx = rev[lo];
         oLcp = getLcp(loIdx, s, 0, length);
         if(oLcp == s.length()) return loIdx;
+		if(s.length() > k)
+		{
+			while(oLcp + loIdx != n && s[oLcp] < reference[loIdx+oLcp])
+			{
+				hi = lo;
+				hiLcp = oLcp;
+				lo -= maxUnder;
+				lo = max((size_t)0, lo);
+				loIdx = rev[lo];
+        		oLcp = getLcp(loIdx, s, 0, length);
+        		if(oLcp == s.length()) return loIdx;
+			}
+		}
         loLcp = oLcp;
       }
     }
@@ -634,4 +674,6 @@ struct Sapling
       fwrite(&mostUnder, sizeof(int), 1, outfile);
     }
   }
+
+  Sapling() {}
 };

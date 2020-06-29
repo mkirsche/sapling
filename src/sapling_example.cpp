@@ -22,6 +22,10 @@ int numQueries = 5000000;
 string errorFnString = "";
 string saFnString = "", saplingFnString = "";
 
+Sapling sap;
+
+void run_experiment(int queryLength);
+
 int main(int argc, char **argv)
 {
     if(argc < 2)
@@ -75,7 +79,7 @@ int main(int argc, char **argv)
     }
 
     // Build the Sapling data structure
-    Sapling sap(refFnString, saFnString, saplingFnString, numBuckets, maxMem, k, errorFnString);
+    sap = Sapling(refFnString, saFnString, saplingFnString, numBuckets, maxMem, k, errorFnString);
     
     cout << "Testing Sapling" << endl;
 
@@ -100,6 +104,39 @@ int main(int argc, char **argv)
         for(int j = 0; j<sap.k; j++) fprintf(outfile, "9");
         fprintf(outfile, "\n");
     }
+
+	run_experiment(sap.k-10);
+	run_experiment(sap.k);
+	run_experiment(sap.k + 10);
+	run_experiment(sap.k + 20);
+	run_experiment(sap.k + 30);
+	run_experiment(sap.k + 80);
+}
+
+void run_experiment(int queryLength)
+{	
+    cout << "Running experiment to search for " << queryLength << "-mers" << endl;
+	// Create queries as random kmers from the genome
+    vector<string> queries(numQueries, "");
+    vector<long long> kmers = vector<long long>(numQueries, 0);
+    vector<size_t> idxs = vector<size_t>(numQueries, 0);
+    for(int i = 0; i<numQueries; i++)
+    {
+        idxs[i] = rand() % (sap.n - queryLength);
+    	queries[i] = sap.reference.substr(idxs[i], queryLength);
+    	kmers[i] = sap.kmerizeAdjusted(queryLength, queries[i]);
+    }
+	// Write the queries to a file
+    FILE *outfile = fopen ("queries2.out", "w");
+    for(int i = 0; i < numQueries; i++)
+    {
+        fprintf(outfile, "@read%d\n", i+1);
+        fprintf(outfile, "%s\n", queries[i].c_str());
+        fprintf(outfile, "+\n");
+        
+        for(int j = 0; j<queryLength; j++) fprintf(outfile, "9");
+        fprintf(outfile, "\n");
+    }
     cout << "Constructed queries" << endl;
     
     // Run piece-wise linear test
@@ -107,7 +144,7 @@ int main(int argc, char **argv)
     auto start = std::chrono::system_clock::now();
     for(int i = 0; i<numQueries; i++)
     {
-        plAnswers[i] = sap.plQuery(queries[i].substr(0, sap.k), kmers[i], queries[i].length());
+        plAnswers[i] = sap.plQuery(queries[i].substr(0, queryLength), kmers[i], queries[i].length());
     }
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
@@ -118,10 +155,11 @@ int main(int argc, char **argv)
     for(int i = 0; i<numQueries; i++)
     {
         if(plAnswers[i] == -1) continue;
-        if(plAnswers[i] + (long long)sap.k <= (long long)sap.n && queries[i] == sap.reference.substr(plAnswers[i], sap.k))
+        if(plAnswers[i] + (long long)queryLength <= (long long)sap.n && queries[i] == sap.reference.substr(plAnswers[i], queryLength))
         {
             countCorrect++;
         }
+//else cout << idxs[i] << " " << plAnswers[i] << " " << queries[i] << " " << sap.reference.substr(plAnswers[i], queryLength) << endl;
     }
-    cout << "Piecewise linear correctness: " << countCorrect << " out of " << numQueries << endl;
+	cout << "Piecewise linear correctness: " << countCorrect << " out of " << numQueries << endl;
 }
