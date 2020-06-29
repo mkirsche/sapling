@@ -21,6 +21,7 @@ int k = -1;
 int numQueries = 5000000;
 string errorFnString = "";
 string saFnString = "", saplingFnString = "";
+int queryLength = -1;
 
 Sapling sap;
 
@@ -30,7 +31,7 @@ int main(int argc, char **argv)
 {
     if(argc < 2)
     {
-        cout << "Usage: " << argv[0] << " <genome file> [saFn=<suffix array file>] [sapFn=<sapling file>] [nb=<log number of buckets>] [maxMem=<max number of buckets will be (genome size)/val>] [k=<k>] [nq=<number of queries>] [errFn=<errors file if outputting them>]" << endl;
+        cout << "Usage: " << argv[0] << " <genome file> [saFn=<suffix array file>] [sapFn=<sapling file>] [nb=<log number of buckets>] [maxMem=<max number of buckets will be (genome size)/val>] [k=<k>] [nq=<number of queries>] [errFn=<errors file if outputting them>] [qLen=<query length>]" << endl;
         return 0;
     }
 
@@ -75,6 +76,10 @@ int main(int argc, char **argv)
         {
           maxMem = stoi(val);
         }
+		if(arg.compare("qLen") == 0)
+        {
+          queryLength = stoi(val);
+        }
       }
     }
 
@@ -83,34 +88,19 @@ int main(int argc, char **argv)
     
     cout << "Testing Sapling" << endl;
 
-    // Create queries as random kmers from the genome
-    vector<string> queries(numQueries, "");
-    vector<long long> kmers = vector<long long>(numQueries, 0);
-    for(int i = 0; i<numQueries; i++)
-    {
-    	size_t idx = rand() % (sap.n - sap.k);
-    	queries[i] = sap.reference.substr(idx, sap.k);
-    	kmers[i] = sap.kmerize(queries[i]);
-    }
-    
-    // Write the queries to a file
-    FILE *outfile = fopen ("queries.out", "w");
-    for(int i = 0; i < numQueries; i++)
-    {
-        fprintf(outfile, "@read%d\n", i+1);
-        fprintf(outfile, "%s\n", queries[i].c_str());
-        fprintf(outfile, "+\n");
-        
-        for(int j = 0; j<sap.k; j++) fprintf(outfile, "9");
-        fprintf(outfile, "\n");
-    }
-
-	run_experiment(sap.k-10);
-	run_experiment(sap.k);
-	run_experiment(sap.k + 10);
-	run_experiment(sap.k + 20);
-	run_experiment(sap.k + 30);
-	run_experiment(sap.k + 80);
+	if(queryLength == -1)
+	{
+		run_experiment(sap.k-10);
+		run_experiment(sap.k);
+		run_experiment(sap.k + 10);
+		run_experiment(sap.k + 20);
+		run_experiment(sap.k + 30);
+		run_experiment(sap.k + 80);
+	}
+    else
+	{
+		run_experiment(queryLength);
+	}
 }
 
 void run_experiment(int queryLength)
@@ -127,7 +117,7 @@ void run_experiment(int queryLength)
     	kmers[i] = sap.kmerizeAdjusted(queryLength, queries[i]);
     }
 	// Write the queries to a file
-    FILE *outfile = fopen ("queries2.out", "w");
+    FILE *outfile = fopen ("queries.out", "w");
     for(int i = 0; i < numQueries; i++)
     {
         fprintf(outfile, "@read%d\n", i+1);
